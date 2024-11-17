@@ -1,9 +1,16 @@
 import express from "express"
 const app = express()
 const PORT = process.env.PORT || 3000
+import 'dotenv/config'
+import connectDB from './utilities/db.js';
 
+
+connectDB()
+app.use(express.json())
 //Routes
 import authRoute from "./routes/auth.js"
+
+
 
 app.use("/api/", authRoute)
 
