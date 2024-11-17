@@ -1,0 +1,31 @@
+{
+    "dependencies": {
+        "bcryptjs": "^2.4.3",
+        "cookie-parser": "^1.4.7",
+        "dotenv": "^16.4.5",
+        "express": "^4.21.1",
+        "jsonwebtoken": "^9.0.2",
+        "mongoose": "^8.8.1",
+        "socket.io": "^4.8.1"
+    },
+    "type": "module",
+    "name": "barter-talk",
+    "version": "1.0.0",
+    "description": "chat aap",
+    "main": "server.js",
+    "devDependencies": {},
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "start": "nodemon server.js"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/JaiminPatel345/BarterTalk.git"
+    },
+    "author": "Jaimin Detroja",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/JaiminPatel345/BarterTalk/issues"
+    },
+    "homepage": "https://github.com/JaiminPatel345/BarterTalk#readme"
+}
