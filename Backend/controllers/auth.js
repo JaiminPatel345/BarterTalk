@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 import User from '../models/user.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import generateTokenAndSetCookies from '../token.js';
+import generateTokenAndSetCookies from '../utilities/token.js';
 
 
 const login = (req, res) => {
