@@ -12,14 +12,26 @@ app.use(cookieParser())
 //Routes
 import authRoute from "./routes/auth.js"
 import messageRoute from "./routes/message.js"
+import userRoute from "./routes/user.js"
 
 
 
-app.use("/api/", authRoute)
 app.use("/api/message", messageRoute)
+app.use("/api/", authRoute)
+app.use("/api/", userRoute)
 
 app.get("/", (req, res) => {
     res.send("Hello World")
+})
+
+
+app.use((error, req, res, next) => {
+
+    console.log("Jaimin", error);
+    res.status(error.status || 500).json({
+        message: error.message || "Unknown error"
+    })
+
 })
 
 app.listen(PORT, () => {
