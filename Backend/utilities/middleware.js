@@ -3,7 +3,7 @@ import User from '../models/user.js';
 
 
 export const protectRoute = (req, res, next) => {
-    const token = req.cookies?.token
+    const token = req.cookies.token
     if (!token) {
         return res.status(401).json({
             message: "Unauthorize , need to log in "
