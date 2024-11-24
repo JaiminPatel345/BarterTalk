@@ -5,8 +5,6 @@ from 'jsonwebtoken';
 const generateTokenAndSetCookies = (userId , name , username, res) => {
     const token = jwt.sign({
         userId , 
-        name , 
-        username
     }, process.env.SECRET_KEY, {
         expiresIn: '1d'
     });

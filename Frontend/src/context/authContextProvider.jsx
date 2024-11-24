@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import { useState } from "react"
-import AuthContext  from "./authContext"
+import AuthContext from "./authContext"
 
 const AuthContextProvider = ({ children }) => {
     const [user, setUser] = useState(
@@ -8,8 +8,12 @@ const AuthContextProvider = ({ children }) => {
     )
 
     const setLogInUser = (user) => {
-        localStorage.setItem("user-info", JSON.stringify(user))
-        setUser(user)
+        const userInfo = {
+            name: user.name,
+            username: user.username,
+        }
+        localStorage.setItem("user-info", JSON.stringify(userInfo))
+        setUser(userInfo)
     }
 
     return (
