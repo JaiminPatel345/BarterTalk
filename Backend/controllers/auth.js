@@ -16,6 +16,9 @@ const login = (req, res) => {
         });
     }
 
+    console.log(req.session);
+    
+
 
     User.findOne({
             username: username
@@ -34,9 +37,11 @@ const login = (req, res) => {
                     message: "Invalid credentials",
                 })
             }
-
-            generateTokenAndSetCookies(user._id, res);
+            req.session.userId = user._id
+            generateTokenAndSetCookies(user._id, user.name , username,  res);
+            console.log(req.session);
             res.json({
+                user,
                 message: "Login successfully"
             })
         })
