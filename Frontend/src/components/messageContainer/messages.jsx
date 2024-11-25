@@ -28,8 +28,12 @@ const Messages = () => {
                     <ScaleLoader color="#fff" />
                 </div>
             ) : (
-                <div className="px-4 overflow-y-scroll  mt-auto">
-                    {messages.map((message, index) => (
+                <div className="px-4   mt-auto">
+                    {messages.length == 0 ? (
+                        <div>
+                            <p className="text-gray-400 text-center">No messages yet</p>
+                        </div>
+                    ) : messages.map((message, index) => (
                         <div
                             key={index}
                             ref={

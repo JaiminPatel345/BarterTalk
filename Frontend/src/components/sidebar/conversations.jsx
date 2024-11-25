@@ -2,9 +2,11 @@
 import Conversation from './conversion';
 import useGetConversations from '../../hooks/useGetConversation';
 import {ScaleLoader} from 'react-spinners';
+import UseConversation from '../../stores/useConversation';
 
 const Conversations = () => {
-  const { conversations , loading } = useGetConversations()
+  const {  loading } = useGetConversations()
+  const {filteredConversations} = UseConversation()
 
   
   if(loading){
@@ -17,12 +19,11 @@ const Conversations = () => {
   
   return (
       <div className="flex flex-col gap-3">
-          {conversations.map((conversation, idx) => (
+          {filteredConversations?.map((conversation, idx) => (
               <Conversation
-              key={conversation._id}
-              conversation={conversation}
-              lastIndex={idx == conversations.length - 1}
-
+                  key={conversation._id}
+                  conversation={conversation}
+                  lastIndex={idx == filteredConversations.length - 1}
               />
           ))}
       </div>

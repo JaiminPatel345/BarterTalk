@@ -7,6 +7,7 @@ const FlashMessageDisplay = () => {
 
     useEffect(() => {
         if (flashMessage) {
+            toast.dismiss()
             const { message, type } = flashMessage
             if (type === "success") {
                 toast.success(message, {
@@ -17,9 +18,10 @@ const FlashMessageDisplay = () => {
                     onClose: clearFlashMessage,
                 })
             } else if (type === "warning") {
+                
                 toast(() => (
                     <span>
-                        <b>you are already logged in </b>
+                        <b>{message} </b>
                         <br />
                     </span>
                 ))
