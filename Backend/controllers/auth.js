@@ -14,10 +14,7 @@ const login = (req, res) => {
         return res.status(400).json({
             message: "Please fill all the required fields"
         });
-    }
-
-    console.log(req.session);
-    
+    }    
 
 
     User.findOne({
@@ -37,7 +34,7 @@ const login = (req, res) => {
                     message: "Invalid credentials",
                 })
             }
-            generateTokenAndSetCookies(user._id, user.name , username,  res);
+            generateTokenAndSetCookies(user._id, res)
             res.json({
                 user,
                 message: "Login successfully"
@@ -105,6 +102,8 @@ const signup = (req, res) => {
             });
         })
         .catch((error) => {
+            console.log(error);
+            
             return res.status(error.status || 500).json({
                 message: error.message || "An error occurred during signup"
             })
@@ -113,7 +112,7 @@ const signup = (req, res) => {
 
 const logout = (req, res) => {
     res.clearCookie('token');
-    req.session.destroy()
+    // req.session.destroy()
     res.json({
         message: "logout successfully"
     })

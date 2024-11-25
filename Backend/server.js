@@ -10,6 +10,7 @@ import session from "express-session"
 
 connectDB()
 app.use(express.json())
+app.set("trust proxy", 1)
 app.use(cookieParser())
 
 app.use(
@@ -22,22 +23,22 @@ app.use(
     })
 )
 
-app.use(
-    session({
-        // store: redisStore,
-        resave: false,
-        saveUninitialized: false,
-        secret: process.env.SECRET_KEY,
-        name: "sessionId", // Custom name instead of 'connect.sid'
-        proxy: true,
-        cookie: {
-            secure: process.env.NODE_ENV === "production" ,
-            maxAge: 1000 * 3600 * 24 * 1, //1 D
-            sameSite: (process.env.NODE_ENV && (process.env.NODE_ENV === "production")) ? "none" : "strict",
-            httpOnly: true, // Added security
-        },
-    })
-)
+// app.use(
+//     session({
+//         // store: redisStore,
+//         resave: false,
+//         saveUninitialized: false,
+//         secret: process.env.SECRET_KEY,
+//         name: "sessionId", // Custom name instead of 'connect.sid'
+//         proxy: true,
+//         cookie: {
+//             secure: process.env.NODE_ENV === "production" ,
+//             maxAge: 1000 * 3600 * 24 * 1, //1 D
+//             sameSite: (process.env.NODE_ENV && (process.env.NODE_ENV === "production")) ? "none" : "strict",
+//             httpOnly: true, // Added security
+//         },
+//     })
+// )
 
 //Routes
 import authRoute from "./routes/auth.js"

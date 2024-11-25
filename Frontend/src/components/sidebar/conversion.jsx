@@ -1,25 +1,34 @@
-const Conversation = () => {
+/* eslint-disable react/prop-types */
+import UseConversation from "../../stores/useConversation"
+const Conversation = ({ conversation, lastIndex }) => {
+    const { selectedConversation, setSelectedConversation } = UseConversation()
+    const isSelected = selectedConversation?._id === conversation._id
     return (
         <>
-            <div className="flex justify-center items-center gap-2 p-3">
+            <div
+                className={`flex justify-center items-center gap-2 p-3 cursor-pointer hover:bg-gray-700 rounded-lg ${
+                    isSelected ? "!bg-blue-400" : ""
+                }`}
+                onClick={() => setSelectedConversation(conversation)}
+            >
                 <div className="avatar online w-12 rounded-full">
                     <div>
                         <img
-                            src="https://avatar.iran.liara.run/public/boy"
+                            src={conversation.profileUrl}
                             className=""
-                            alt="user avatar"
+                            alt={conversation.username}
                         />
                     </div>
                 </div>
                 <div className="flex flex-1">
                     <div>
                         <p className="font-bold text-gray-200 ">
-                            Jaimin Detroja
+                            {conversation.name}
                         </p>
                     </div>
                 </div>
             </div>
-            <div className="divider my-0 py-0 h-1"></div>
+            {!lastIndex && <div className="divider my-0 py-0 h-1"></div>}
         </>
     )
 }

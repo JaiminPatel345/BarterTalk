@@ -1,12 +1,18 @@
 import { useEffect } from "react";
 import MessageInput from "./messageInput"
 import Messages from "./messages"
+import UseConversation from "../../stores/useConversation";
 
 const MessageContainer = () => {
-	const isChatSelected = false;
-	
+    const { selectedConversation, setSelectedConversation } = UseConversation()	
 
-	if (isChatSelected) {
+    useEffect(() => {
+        return(() => {
+            setSelectedConversation(null)
+        })
+    },[])
+
+	if (!selectedConversation) {
         return (
             <>
                 <NoChatSelected />
@@ -17,9 +23,15 @@ const MessageContainer = () => {
         <div className="md:min-w-[450px] h-full w-full flex flex-col ">
             <>
                 {/* Header */}
-                <div className="bg-slate-500 px-4 py-2 mb-2 rounded-lg">
-                    <span className="label-text">To:</span>{" "}
-                    <span className="text-gray-900 font-bold">John doe</span>
+                <div className="bg-blue-400 px-4 py-2 mb-2 rounded-lg flex items-center gap-4">
+                    <div className="avatar">
+                        <div className="w-10 rounded-full">
+                            <img src={selectedConversation.profileUrl} />
+                        </div>
+                    </div>
+                    <div className="text-gray-900 font-bold">
+                        {selectedConversation.name}{" "}
+                    </div>
                 </div>
 
                 <Messages />

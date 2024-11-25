@@ -3,9 +3,13 @@ import LogoutUser from "../../utils/logout"
 import FlashMessageContext from "../../context/flashMessageContext"
 import {PuffLoader} from "react-spinners"
 import { useNavigate } from 'react-router-dom';
+import AuthContext from "../../context/authContext";
+import UseConversation from "../../stores/useConversation";
 
 const Logout = () => {
-    const { showSuccessMessage, showErrorMessage } = useContext(FlashMessageContext)
+    const { showSuccessMessage, showErrorMessage , clearFlashMessage} = useContext(FlashMessageContext)
+    const {setUser} = useContext(AuthContext)
+    const {setSelectedConversation} = UseConversation()
     const [logoutLoader , setLogoutLoader] = useState(false)
     const navigate = useNavigate()
 
@@ -13,6 +17,8 @@ const Logout = () => {
         try {
             setLogoutLoader(true)
             LogoutUser()
+            setUser(null)
+            setSelectedConversation(null)
             const response = await fetch(
                 // eslint-disable-next-line no-undef
                 `${process.env.VITE_API_BASE_URL}/api/logout`,
@@ -26,7 +32,9 @@ const Logout = () => {
             )
             const data = await response.json()
             if (response.ok) {
+                clearFlashMessage()
                 showSuccessMessage(`Logout Successfully `)
+                navigate("/login")
                 
             } else {
                 throw {
@@ -38,7 +46,7 @@ const Logout = () => {
             console.log(error);
         }
         setLogoutLoader(false)
-        navigate("/login")
+        
 
     }
     return (

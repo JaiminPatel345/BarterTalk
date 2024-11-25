@@ -116,6 +116,7 @@ const Login = () => {
                             onChange={handelChange}
                             placeholder="Enter Password"
                             className="w-full input input-bordered h-10 focus:border-[#FF5317]"
+                            autoComplete="on"
                         />
                     </div>
                     <Link
