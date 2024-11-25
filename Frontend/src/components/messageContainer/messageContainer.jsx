@@ -1,6 +1,8 @@
 import MessageInput from "./messageInput"
 import Messages from "./messages"
 import UseConversation from "../../stores/useConversation";
+import { useContext } from "react";
+import AuthContext from "../../context/authContext";
 
 const MessageContainer = () => {
     const { selectedConversation } = UseConversation()	
@@ -40,11 +42,11 @@ export default MessageContainer
 
 
 const NoChatSelected = () => {
-    // const { authUser } = useAuthContext()
+    const {user} = useContext(AuthContext)
     return (
         <div className="flex items-center justify-center w-full h-full">
             <div className="px-4 text-center sm:text-lg md:text-xl text-gray-200 font-semibold flex flex-col items-center gap-2">
-                <p>Welcome 👋 Jaimin </p>
+                <p>Welcome 👋 {user.name} </p>
                 <p>Select a chat to start messaging</p>
                 <div>
                     <svg

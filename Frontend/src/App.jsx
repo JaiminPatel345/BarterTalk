@@ -10,11 +10,13 @@ import FlashMessageProvider from "./context/flashMessageProvider"
 import FlashMessageDisplay from "./components/flashMessageDisplay"
 import AuthContextProvider from "./context/authContextProvider"
 import { Toaster } from "react-hot-toast"
-
+import SocketProvider from "./context/socketProvider"
 const Layout = () => {
     return (
         <AuthContextProvider>
             <FlashMessageProvider>
+                <SocketProvider>
+
                 <div className="min-h-screen relative">
                     <FlashMessageDisplay />
                     <Toaster />
@@ -22,6 +24,7 @@ const Layout = () => {
                         <Outlet />
                     </div>
                 </div>
+                </SocketProvider>
             </FlashMessageProvider>
         </AuthContextProvider>
     )

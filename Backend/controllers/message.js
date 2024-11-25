@@ -1,5 +1,6 @@
 import Message from "../models/message.js"
 import Conversation from "../models/conversation.js"
+import { getReceiverSocketId , io} from "../socket/socket.js"
 
 
 export const getMessage = (req, res) => {
@@ -65,6 +66,10 @@ export const sendMessage = (req, res) => {
             })
         })
         .then((newMsg) => {
+            const receiverSocketId = getReceiverSocketId(receiverId)
+            if(receiverSocketId){
+                io.to(receiverSocketId).emit("newMessage" , newMsg )
+            }
             res.json(newMsg)
         })
         .catch((error) => {

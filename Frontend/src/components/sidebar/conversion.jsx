@@ -1,8 +1,12 @@
 /* eslint-disable react/prop-types */
+import { useContext } from "react"
 import UseConversation from "../../stores/useConversation"
+import SocketContext from "../../context/socketContext"
 const Conversation = ({ conversation, lastIndex }) => {
     const { selectedConversation, setSelectedConversation } = UseConversation()
     const isSelected = selectedConversation?._id === conversation._id
+    const {onlineUsers} = useContext(SocketContext)
+    const isOnline = onlineUsers.includes(conversation._id)
     return (
         <>
             <div
@@ -11,7 +15,7 @@ const Conversation = ({ conversation, lastIndex }) => {
                 }`}
                 onClick={() => setSelectedConversation(conversation)}
             >
-                <div className="avatar online w-12 rounded-full">
+                <div className={`avatar ${isOnline ? "online" : "offline"} w-12 rounded-full`}>
                     <div>
                         <img
                             src={conversation.profileUrl}

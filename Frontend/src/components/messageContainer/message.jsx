@@ -8,6 +8,7 @@ const Message = ({message}) => {
     const {selectedConversation} = UseConversation()
     const {user} = useContext(AuthContext)
     const isSendByMe = message?.receiverId?.toString() === selectedConversation._id?.toString()
+    const shakeClass = message.shouldShack ? "shake" : ""
 
     return (
         <>
@@ -27,7 +28,7 @@ const Message = ({message}) => {
                 <div className="chat-header">
                     {isSendByMe ? user.name : selectedConversation.name}
                 </div>
-                <div className="chat-bubble">{message.message}</div>
+                <div className={`chat-bubble ${shakeClass}`}>{message.message}</div>
                 <div className="chat-footer text-xs opacity-50">
                     {extractTime(message.createdAt)}
                 </div>

@@ -12,6 +12,7 @@ const AuthContextProvider = ({ children }) => {
             name: user.name,
             username: user.username,
             profileUrl:user.profileUrl,
+            _id : user._id,
         }
         localStorage.setItem("user-info", JSON.stringify(userInfo))
         setUser(userInfo)

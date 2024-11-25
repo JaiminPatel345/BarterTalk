@@ -1,5 +1,4 @@
 import express from "express"
-const app = express()
 const PORT = process.env.PORT || 3000
 import "dotenv/config"
 import connectDB from "./utilities/db.js"
@@ -7,6 +6,7 @@ import cookieParser from "cookie-parser"
 import cors from "cors"
 import session from "express-session"
 // import redisStore from "./utilities/redis.js"
+import {app , server , io } from "./socket/socket.js"
 
 connectDB()
 app.use(express.json())
@@ -60,6 +60,6 @@ app.use((error, req, res, next) => {
     })
 })
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`)
 })
