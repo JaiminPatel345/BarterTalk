@@ -1,16 +1,10 @@
-import { useEffect } from "react";
 import MessageInput from "./messageInput"
 import Messages from "./messages"
 import UseConversation from "../../stores/useConversation";
 
 const MessageContainer = () => {
-    const { selectedConversation, setSelectedConversation } = UseConversation()	
+    const { selectedConversation } = UseConversation()	
 
-    useEffect(() => {
-        return(() => {
-            setSelectedConversation(null)
-        })
-    },[])
 
 	if (!selectedConversation) {
         return (
@@ -34,7 +28,9 @@ const MessageContainer = () => {
                     </div>
                 </div>
 
-                <Messages />
+                <div className="flex-1 h-full overflow-y-auto">
+                    <Messages />
+                </div>
                 <MessageInput />
             </>
         </div>

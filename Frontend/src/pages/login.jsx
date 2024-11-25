@@ -63,8 +63,7 @@ const Login = () => {
             const data = await response.json()
             if (response.ok) {
                 showSuccessMessage(`Welcome ${formData.username} !`)
-                setLogInUser(data)
-                console.log(data);
+                setLogInUser(data.user)
                 
             } else {
                 throw {

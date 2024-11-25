@@ -39,17 +39,16 @@ export const sendMessage = (req, res) => {
     const senderId = req.user._id
 
     Conversation.findOne({
-            participants: {
-                $all: [senderId, req.user._id]
-            },
-        })
+        participants: {
+            $all: [senderId, receiverId],
+        },
+    })
         .then((conversation) => {
             if (!conversation) {
                 const newConversation = new Conversation({
                     participants: [receiverId, senderId],
                 })
                 return newConversation.save()
-
             } else {
                 return conversation
             }
@@ -58,17 +57,18 @@ export const sendMessage = (req, res) => {
             return Message.create({
                 senderId,
                 receiverId,
-                message
+                message,
             }).then((newMsg) => {
                 conversation.messages.push(newMsg)
-                return conversation.save()
+                conversation.save()
+                return newMsg
             })
         })
-        .then((conversation) => {
-            res.json(conversation)
+        .then((newMsg) => {
+            res.json(newMsg)
         })
         .catch((error) => {
-            console.log(error);
+            console.log(error)
             res.status(error.status || 500).json(error.message)
         })
 }

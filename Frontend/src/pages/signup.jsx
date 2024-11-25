@@ -84,7 +84,7 @@ const SignUp = () => {
             const data = await response.json()
             if (response.ok) {
                 showSuccessMessage(`Welcome ${formData.name} !`)
-				setLogInUser(data)
+				setLogInUser(data.user)
             }else{
 				console.log(data);
 				throw {
