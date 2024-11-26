@@ -1,11 +1,24 @@
 import MessageInput from "./messageInput"
 import Messages from "./messages"
 import UseConversation from "../../stores/useConversation";
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import AuthContext from "../../context/authContext";
+import storeOrGetAvatar from "../../utils/avatar";
 
 const MessageContainer = () => {
     const { selectedConversation } = UseConversation()	
+    const [avatar, setAvatar] = useState("")
+
+    useEffect(() => {
+        const getAvatar = async () => {
+            let url = await storeOrGetAvatar(
+                selectedConversation?.profileUrl,
+                selectedConversation?._id
+            )
+            setAvatar(url)
+        }
+        getAvatar()
+    }, [selectedConversation])
 
 
 	if (!selectedConversation) {
@@ -19,10 +32,10 @@ const MessageContainer = () => {
         <div className="md:min-w-[450px] h-full w-full flex flex-col ">
             <>
                 {/* Header */}
-                <div className="bg-blue-400 px-4 py-2 mb-2 rounded-lg flex items-center gap-4">
+                <div className="bg-blue-400 px-4 py-2 m-2 rounded-lg flex items-center gap-4">
                     <div className="avatar">
                         <div className="w-10 rounded-full">
-                            <img src={selectedConversation.profileUrl} />
+                            <img src={avatar} />
                         </div>
                     </div>
                     <div className="text-gray-900 font-bold">

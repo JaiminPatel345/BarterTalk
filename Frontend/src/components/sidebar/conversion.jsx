@@ -1,12 +1,25 @@
 /* eslint-disable react/prop-types */
-import { useContext } from "react"
+import { useContext, useEffect, useState } from "react"
 import UseConversation from "../../stores/useConversation"
 import SocketContext from "../../context/socketContext"
+import storeOrGetAvatar from "../../utils/avatar"
 const Conversation = ({ conversation, lastIndex }) => {
     const { selectedConversation, setSelectedConversation } = UseConversation()
     const isSelected = selectedConversation?._id === conversation._id
     const {onlineUsers} = useContext(SocketContext)
     const isOnline = onlineUsers.includes(conversation._id)
+    const [avatar, setAvatar] = useState("")
+
+    useEffect(() => {
+        const getAvatar = async () => {
+            let url = await storeOrGetAvatar(
+                conversation.profileUrl,
+                conversation._id
+            )
+            setAvatar(url)
+        }
+        getAvatar()
+    }, [conversation])
     return (
         <>
             <div
@@ -18,7 +31,7 @@ const Conversation = ({ conversation, lastIndex }) => {
                 <div className={`avatar ${isOnline ? "online" : "offline"} w-12 rounded-full`}>
                     <div>
                         <img
-                            src={conversation.profileUrl}
+                            src={avatar}
                             className=""
                             alt={conversation.username}
                         />

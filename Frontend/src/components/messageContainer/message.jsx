@@ -1,14 +1,29 @@
 /* eslint-disable react/prop-types */
-import { useContext } from "react"
+import { useState ,useEffect ,  useContext } from "react"
 import UseConversation from "../../stores/useConversation"
 import AuthContext from '../../context/authContext';
 import { extractTime } from "../../utils/extractTime";
+import storeOrGetAvatar from "../../utils/avatar";
 
 const Message = ({message}) => {
     const {selectedConversation} = UseConversation()
     const {user} = useContext(AuthContext)
     const isSendByMe = message?.receiverId?.toString() === selectedConversation._id?.toString()
     const shakeClass = message.shouldShack ? "shake" : ""
+    const [avatar, setAvatar] = useState("")
+
+    useEffect(() => {
+        const getAvatar = async () => {
+            let url = await storeOrGetAvatar(
+                isSendByMe
+                    ? user?.profileUrl
+                    : selectedConversation?.profileUrl,
+                message?.senderId
+            )
+            setAvatar(url)
+        }
+        getAvatar()
+    }, [user , selectedConversation])
 
     return (
         <>
@@ -17,11 +32,7 @@ const Message = ({message}) => {
                     <div className="w-10 rounded-full">
                         <img
                             alt="Display Picture"
-                            src={`${
-                                isSendByMe
-                                    ? user?.profileUrl
-                                    : selectedConversation?.profileUrl
-                            }`}
+                            src={avatar}
                         />
                     </div>
                 </div>

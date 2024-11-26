@@ -18,7 +18,7 @@ const Conversations = () => {
   }
   
   return (
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-3 overflow-auto h-[70%]">
           {filteredConversations?.map((conversation, idx) => (
               <Conversation
                   key={conversation._id}

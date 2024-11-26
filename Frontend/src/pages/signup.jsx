@@ -61,7 +61,7 @@ const SignUp = () => {
                     message: "Passwords do not match",
                 }
             }
-            const user = {
+            const currUser = {
                 name: formData.name,
                 username: formData.username,
                 password: formData.password,
@@ -77,14 +77,14 @@ const SignUp = () => {
                     headers: {
                         "Content-Type": "application/json",
                     },
-                    body: JSON.stringify(user),
+                    body: JSON.stringify(currUser),
                     credentials: "include",
                 }
             )
             const data = await response.json()
             if (response.ok) {
                 showSuccessMessage(`Welcome ${formData.name} !`)
-				setLogInUser(data.user)
+				setLogInUser(data.data)
             }else{
 				console.log(data);
 				throw {

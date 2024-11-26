@@ -1,4 +1,4 @@
-import { useContext, useState, useEffect } from "react"
+import { useContext, useState } from "react"
 import UseConversation from "../../stores/useConversation"
 import FlashMessageContext from "../../context/flashMessageContext"
 import useGetConversations from "../../hooks/useGetConversation"
