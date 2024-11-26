@@ -8,8 +8,15 @@ dotenv.config()
 
 // https://vite.dev/config/
 export default defineConfig({
-  define: {
+    define: {
         "process.env": process.env,
     },
-  plugins: [react()],
+    proxy: {
+        "/api": {
+            // eslint-disable-next-line no-undef
+            target: process.env.VITE_API_BASE_URL, // Use the environment variable
+            changeOrigin: true,
+        },
+    },
+    plugins: [react()],
 })
