@@ -1,12 +1,12 @@
 import MessageInput from "./messageInput"
 import Messages from "./messages"
-import UseConversation from "../../stores/useConversation";
-import { useContext, useEffect, useState } from "react";
-import AuthContext from "../../context/authContext";
-import storeOrGetAvatar from "../../utils/avatar";
+import UseConversation from "../../stores/useConversation"
+import { useContext, useEffect, useState } from "react"
+import AuthContext from "../../context/authContext"
+import storeOrGetAvatar from "../../utils/avatar"
 
 const MessageContainer = () => {
-    const { selectedConversation } = UseConversation()	
+    const { selectedConversation, setSelectedConversation } = UseConversation()
     const [avatar, setAvatar] = useState("")
 
     useEffect(() => {
@@ -20,26 +20,49 @@ const MessageContainer = () => {
         getAvatar()
     }, [selectedConversation])
 
-
-	if (!selectedConversation) {
+    if (!selectedConversation) {
         return (
-            <>
+            <div className={`${selectedConversation ? "w-screen" : "hidden md:block h-full w-full"}`}>
                 <NoChatSelected />
-            </>
+            </div>
         )
     }
     return (
-        <div className="md:min-w-[450px] h-full w-full flex flex-col ">
+        <div className="h-full w-full flex flex-col ">
             <>
                 {/* Header */}
-                <div className="bg-blue-400 px-4 py-2 m-2 rounded-lg flex items-center gap-4">
-                    <div className="avatar">
-                        <div className="w-10 rounded-full">
-                            <img src={avatar} />
-                        </div>
+                <div className="bg-blue-400 px-4 py-2 m-2 rounded-lg items-center  flex gap-4">
+                    <div
+                        className="text-white hover:bg-blue-500 rounded-full p-2 cursor-pointer"
+                        onClick={() => {
+                            setSelectedConversation(null)
+                        }}
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="icon icon-tabler icons-tabler-outline icon-tabler-chevron-left"
+                        >
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                            <path d="M15 6l-6 6l6 6" />
+                        </svg>
                     </div>
-                    <div className="text-gray-900 font-bold">
-                        {selectedConversation.name}{" "}
+                    <div className="flex items-center  gap-2">
+                        <div className="avatar">
+                            <div className="w-10 rounded-full">
+                                <img src={avatar} />
+                            </div>
+                        </div>
+                        <div className="text-gray-900 font-bold">
+                            {selectedConversation.name}{" "}
+                        </div>
                     </div>
                 </div>
 
@@ -53,9 +76,8 @@ const MessageContainer = () => {
 }
 export default MessageContainer
 
-
 const NoChatSelected = () => {
-    const {user} = useContext(AuthContext)
+    const { user } = useContext(AuthContext)
     return (
         <div className="flex items-center justify-center w-full h-full">
             <div className="px-4 text-center sm:text-lg md:text-xl text-gray-200 font-semibold flex flex-col items-center gap-2">

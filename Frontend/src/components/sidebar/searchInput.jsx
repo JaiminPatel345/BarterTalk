@@ -67,7 +67,7 @@ const SearchInput = () => {
                     placeholder="Search..."
                     value={search}
                     onChange={(e) => handleSearch(e.target.value)}
-                    className="input input-bordered rounded-full"
+                    className="input input-bordered rounded-full w-full"
                 />
                 <button
                     type="submit"
