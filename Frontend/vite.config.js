@@ -11,6 +11,7 @@ export default defineConfig({
     define: {
         "process.env": process.env,
     },
+    base: "/",
     proxy: {
         "/api": {
             // eslint-disable-next-line no-undef
