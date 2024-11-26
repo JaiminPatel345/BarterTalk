@@ -80,9 +80,9 @@ const Login = () => {
     return (
         <div className="flex flex-col items-center justify-center mx-auto w-[75%]">
             <div className="w-full p-6 rounded-lg shadow-md bg-gray-400 bg-clip-padding backdrop-filter backdrop-blur-lg bg-opacity-0 ">
-                <h1 className="text-3xl font-semibold text-center text-white">
+                <h1 className="text-3xl font-semibold text-center text-white md:flex md:gap-3 md:justify-center" >
                     Login to
-                    <span className="text-blue-500"> Barter Talk</span>
+                    <p className="text-blue-500"> Barter Talk</p>
                 </h1>
 
                 <form onSubmit={handelSubmit}>

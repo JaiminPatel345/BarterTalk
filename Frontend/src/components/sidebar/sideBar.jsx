@@ -8,7 +8,7 @@ const SideBar = () => {
     const {selectedConversation} = UseConversation()
 
     return (
-        <div className={`relative py-3 ${selectedConversation ? "hidden md:block" : "block"} w-full`}>
+        <div className={`h-full py-3 ${selectedConversation ? "hidden md:block" : "block"} `}>
             <SearchInput />
             <div className="divider "></div>
             <Conversations />
