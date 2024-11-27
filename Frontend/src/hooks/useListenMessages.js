@@ -1,18 +1,21 @@
-import { useContext, useEffect } from "react"
-import SocketContext from "../context/socketContext"
+import {  useEffect } from "react"
 import UseConversation from "../stores/useConversation"
 import NotificationSound from "../assets/sounds/notification.mp3"
+import useSocket from "../stores/useSocket"
 
 const useListenMessages = () => {
-  const {socket} = useContext(SocketContext)
+  const socket = useSocket((state) => state.socket)
   const {messages , setMessages} = UseConversation()
 
   useEffect(() => {
-    socket?.on("newMessage" , (newMsg) => {
-        newMsg.shouldShack = true
+    socket?.on("newMessage" , (data) => {
+      console.log(data);
+      
+        data.shouldShack = true
+        
         const sound = new Audio(NotificationSound)
         sound.play()
-        setMessages([...messages , newMsg])
+        setMessages([...messages, data])
     })
 
     return () => socket?.off("newMessage")

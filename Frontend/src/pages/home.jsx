@@ -4,6 +4,7 @@ import AuthContext from "../context/authContext";
 import SideBar from '../components/sidebar/sideBar';
 import MessageContainer from '../components/messageContainer/messageContainer';
 import UseConversation from "../stores/useConversation";
+import { useInitializeSocket } from "../stores/useSocket";
 
 
 const Home = () => {
@@ -12,6 +13,7 @@ const Home = () => {
     const { selectedConversation } = UseConversation()
     const [isResizing, setIsResizing] = useState(false)
     const [sidebarWidth, setSidebarWidth] = useState(320)
+    useInitializeSocket()
 
     useEffect(() => {
         if (!user) {

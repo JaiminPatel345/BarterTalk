@@ -1,12 +1,12 @@
 /* eslint-disable react/prop-types */
-import { useContext, useEffect, useState } from "react"
+import {  useEffect, useState } from "react"
 import UseConversation from "../../stores/useConversation"
-import SocketContext from "../../context/socketContext"
 import storeOrGetAvatar from "../../utils/avatar"
+import useSocket from "../../stores/useSocket"
 const Conversation = ({ conversation, lastIndex }) => {
     const { selectedConversation, setSelectedConversation } = UseConversation()
     const isSelected = selectedConversation?._id === conversation._id
-    const {onlineUsers} = useContext(SocketContext)
+    const onlineUsers  = useSocket((state) => state.onlineUsers)
     const isOnline = onlineUsers.includes(conversation._id)
     const [avatar, setAvatar] = useState("")
 
@@ -28,7 +28,11 @@ const Conversation = ({ conversation, lastIndex }) => {
                 }`}
                 onClick={() => setSelectedConversation(conversation)}
             >
-                <div className={`avatar ${isOnline ? "online" : "offline"} w-12 rounded-full`}>
+                <div
+                    className={`avatar ${
+                        isOnline ? "online" : "offline"
+                    } w-12 rounded-full`}
+                >
                     <div>
                         <img
                             src={avatar}
@@ -37,13 +41,18 @@ const Conversation = ({ conversation, lastIndex }) => {
                         />
                     </div>
                 </div>
-                <div className="flex flex-1">
-                    <div>
+                <div className="flex flex-1 relative h-full">
                         <p className="font-bold text-gray-200 ">
                             {conversation.name}
                         </p>
-                    </div>
+                        <p className="absolute text-sm text-gray-200 bottom-1">
+                            new Message
+                        </p>
                 </div>
+                <div
+                    className="h-4 w-4 bg-green-500 rounded-full tooltip"
+                    data-tip="New "
+                ></div>
             </div>
             {!lastIndex && <div className="divider my-0 py-0 h-1"></div>}
         </>
