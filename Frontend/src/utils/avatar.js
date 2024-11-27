@@ -1,5 +1,6 @@
 async function storeOrGetAvatar(imageUrl, userId) {
     // Check localStorage first
+    if(!userId || !imageUrl) return "https://www.shutterstock.com/image-vector/avatar-gender-neutral-silhouette-vector-600nw-2470054311.jpg"
     const cachedAvatar = localStorage.getItem(`avatar-${userId}`)
 
     if (cachedAvatar) {

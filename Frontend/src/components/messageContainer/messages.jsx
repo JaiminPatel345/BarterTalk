@@ -3,11 +3,9 @@ import Message from "./message"
 import UseConversation from "../../stores/useConversation"
 import useGetMessages from "../../hooks/useGetMessages"
 import { ScaleLoader } from "react-spinners"
-import useListenMessages from "../../hooks/useListenMessages"
 
 const Messages = () => {
     const { messages , selectedConversation } = UseConversation()
-    useListenMessages()
     const { getMessage, loading } = useGetMessages()
     const lastMsgRef = useRef()
 
