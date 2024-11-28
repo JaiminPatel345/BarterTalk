@@ -5,15 +5,13 @@ import storeOrGetAvatar from "../../utils/avatar"
 import useSocket from "../../stores/useSocket"
 const Conversation = ({ conversation, lastIndex }) => {
     const { selectedConversation, setSelectedConversation } = UseConversation()
-    const { getUnreadMsgOfUser, unreadMessages, clearUnreadMessage } =
+    const {  unreadMessages, clearUnreadMessage } =
         useSocket()
     const isSelected = selectedConversation?._id === conversation._id
     const onlineUsers = useSocket((state) => state.onlineUsers)
     const isOnline = onlineUsers.includes(conversation._id)
     const [avatar, setAvatar] = useState("")
-    const [unreadMsg, setUnreadMsg] = useState(
-        getUnreadMsgOfUser(conversation._id)
-    )
+    const [unreadMsg, setUnreadMsg] = useState("")
 
     useEffect(() => {
         const getAvatar = async () => {
@@ -26,9 +24,17 @@ const Conversation = ({ conversation, lastIndex }) => {
         getAvatar()
     }, [conversation])
 
+    // useEffect(() => {
+    //     const msg = unreadMessages.find(
+    //         (msg) => msg.senderId === conversation._id
+    //     )
+    //     setUnreadMsg(msg?.message)
+    // }, [unreadMessages, conversation._id])
+
     useEffect(() => {
-        setUnreadMsg(getUnreadMsgOfUser(conversation._id))
-    }, [unreadMessages, conversation._id])
+        const newMsg = localStorage.getItem(`unread_${conversation._id}`)
+        setUnreadMsg(newMsg || "")
+    }, [unreadMessages])
 
     const handleConversationClick = () => {
         setSelectedConversation(conversation)

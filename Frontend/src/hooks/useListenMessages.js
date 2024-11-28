@@ -9,7 +9,6 @@ const useListenMessages = () => {
 
     useEffect(() => {
         socket?.on("newMessage", (data) => {
-
             if (selectedConversation?._id === data.senderId) {
                 setMessages([...messages, data])
                 data.shouldShack = true
@@ -33,7 +32,7 @@ const useListenMessages = () => {
         })
 
         return () => socket?.off("newMessage")
-    }, [socket,  messages])
+    }, [socket, messages, selectedConversation])
 }
 
 export default useListenMessages

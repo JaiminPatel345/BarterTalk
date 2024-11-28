@@ -9,7 +9,7 @@ const Message = ({message}) => {
     const {selectedConversation} = UseConversation()
     const {user} = useContext(AuthContext)
     const isSendByMe = message?.receiverId?.toString() === selectedConversation._id?.toString()
-    const shakeClass = message.shouldShack ? "shake" : ""
+    const shakeClass = message.shouldShake ? "shake" : ""
     const [avatar, setAvatar] = useState("")
 
     useEffect(() => {
