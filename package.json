@@ -18,7 +18,9 @@
     "version": "1.0.0",
     "description": "chat aap",
     "main": "server.js",
-    "devDependencies": {},
+    "devDependencies": {
+        "prettier": "3.4.2"
+    },
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
         "start": "node server.js",
