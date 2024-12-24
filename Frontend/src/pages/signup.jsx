@@ -2,9 +2,10 @@ import { Link, useNavigate } from "react-router-dom";
 import GenderCheckbox from "../components/generateCheckbox";
 import { useContext, useEffect, useState } from "react";
 import { HashLoader } from "react-spinners";
-import { IconBrandGoogleFilled } from "@tabler/icons-react";
 import FlashMessageContext from "../context/flashMessageContext";
 import AuthContext from "../context/authContext";
+import { GoogleLogin } from "@react-oauth/google";
+import setProfileFromGoogleSignup from "../hooks/setProfileFromGoogleSignup.js";
 
 const SignUp = () => {
   const [formData, setFormData] = useState({
@@ -23,13 +24,26 @@ const SignUp = () => {
 
   useEffect(() => {
     if (user) {
-      showSuccessMessage("You are already logged in");
       navigate("/");
     }
-  }, [user, navigate, showSuccessMessage]);
+  }, [user, navigate]);
 
   const handleChange = (e) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const handleGoogleSignup = async (googleUserData) => {
+    try {
+      const data = await setProfileFromGoogleSignup(googleUserData);
+      if (data) {
+        showSuccessMessage(`Welcome ${data.user.name}!`);
+        setLogInUser(data.user);
+        navigate("/");
+      }
+    } catch (error) {
+      showErrorMessage(error.message || "Unknown error");
+      console.log(error);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -53,7 +67,7 @@ const SignUp = () => {
       }
 
       const response = await fetch(
-        `${process.env.VITE_API_BASE_URL}/api/signup`,
+        `${import.meta.env.VITE_API_BASE_URL}/api/signup`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -89,10 +103,21 @@ const SignUp = () => {
           <span className="text-blue-600"> Barter Talk</span>
         </h1>
 
-        <button className="w-full py-2.5 px-4 mb-6 flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors">
-          <IconBrandGoogleFilled className="w-5 h-5" />
-          Continue with Google
-        </button>
+        {/*<button className="w-full py-2.5 px-4 mb-6 flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors">*/}
+        {/*  <IconBrandGoogleFilled className="w-5 h-5" />*/}
+        {/*  Continue with Google*/}
+        {/*</button>*/}
+
+        <div className={`w-full mb-5 flex items-center justify-center`}>
+          <GoogleLogin
+            text={`signup_with`}
+            onSuccess={handleGoogleSignup}
+            onError={(error) => {
+              showErrorMessage(error.message || "Unknown error");
+              console.log("error : ", error);
+            }}
+          />
+        </div>
 
         <div className="relative mb-6">
           <div className="absolute inset-0 flex items-center">

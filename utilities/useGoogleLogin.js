@@ -2,8 +2,6 @@ import User from "../models/user.js";
 import generateTokenAndSetCookies from "./token.js";
 
 const useGoogleLogin = async (googleUser, res) => {
-  console.log(googleUser);
-
   //find user in db
   const dbUser = await User.findOne({
     email: googleUser.email,

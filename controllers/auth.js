@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import generateTokenAndSetCookies from "../utilities/token.js";
 import useGoogleLogin from "../utilities/useGoogleLogin.js";
+import useGoogleSignup from "../utilities/useGoogleSignup.js";
 
 const login = async (req, res) => {
   const isByGoogle = req.query.bygoogle;
@@ -50,7 +51,12 @@ const login = async (req, res) => {
     });
 };
 
-const signup = (req, res) => {
+const signup = async (req, res) => {
+  const isByGoogle = req.query.bygoogle;
+  if (isByGoogle) {
+    await useGoogleSignup(req.body, res);
+    return;
+  }
   const { name, username, password, gender } = req.body;
   if (!name || !username || !password || !gender) {
     return res.status(400).json({

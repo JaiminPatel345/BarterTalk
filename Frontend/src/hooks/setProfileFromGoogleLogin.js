@@ -13,10 +13,8 @@ const setProfileFromGoogleLogin = async (data) => {
   );
   const responseData = await response.json();
   if (response.ok) {
-    console.log(responseData);
     return responseData;
   } else {
-    console.log(responseData);
     throw new Error(responseData.message);
   }
 };

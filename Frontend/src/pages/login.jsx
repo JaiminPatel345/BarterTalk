@@ -20,7 +20,7 @@ const Login = () => {
 
   useEffect(() => {
     if (user) {
-      showSuccessMessage("You are already logged in");
+      // showSuccessMessage("You are already logged in");
       navigate("/");
     }
   }, [user, navigate, showSuccessMessage]);
