@@ -7,3 +7,4 @@ Real time chat app
 - tailwind
 - daisyUI
 - zustand
+- Google OAuth2

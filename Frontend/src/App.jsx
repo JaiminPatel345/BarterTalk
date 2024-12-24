@@ -5,7 +5,7 @@ import {
   createRoutesFromElements,
   RouterProvider,
 } from "react-router-dom";
-import { Home, Signup, Login } from "./pages";
+import { Home, Signup, Login, SetProfile } from "./pages";
 import FlashMessageProvider from "./context/flashMessageProvider";
 import FlashMessageDisplay from "./components/flashMessageDisplay";
 import AuthContextProvider from "./context/authContextProvider";
@@ -14,7 +14,7 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 import { Toaster } from "react-hot-toast";
 const Layout = () => {
   return (
-    <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
+    <GoogleOAuthProvider clientId={import.meta.env.VITE_APP_GOOGLE_CLIENT_ID}>
       <AuthContextProvider>
         <FlashMessageProvider>
           <div className="min-h-screen relative">
@@ -35,6 +35,7 @@ const myRouter = createBrowserRouter(
     <Route path="/" element={<Layout />}>
       <Route index element={<Home />} />
       <Route path="signup" element={<Signup />} />
+      <Route path="profile" element={<SetProfile />} />
       <Route path="login" element={<Login />} />
     </Route>,
   ),

@@ -11,6 +11,7 @@ const SignUp = () => {
   const [formData, setFormData] = useState({
     name: "",
     username: "",
+    email: "",
     password: "",
     confirmPassword: "",
   });
@@ -19,14 +20,8 @@ const SignUp = () => {
 
   const { showSuccessMessage, showErrorMessage } =
     useContext(FlashMessageContext);
-  const { user, setLogInUser } = useContext(AuthContext);
+  const { setLogInUser } = useContext(AuthContext);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    if (user) {
-      navigate("/");
-    }
-  }, [user, navigate]);
 
   const handleChange = (e) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -38,7 +33,7 @@ const SignUp = () => {
       if (data) {
         showSuccessMessage(`Welcome ${data.user.name}!`);
         setLogInUser(data.user);
-        navigate("/");
+        navigate("/profile");
       }
     } catch (error) {
       showErrorMessage(error.message || "Unknown error");
@@ -54,6 +49,7 @@ const SignUp = () => {
       if (
         !formData.name ||
         !formData.username ||
+        !formData.email ||
         !formData.password ||
         !formData.confirmPassword
       ) {
@@ -75,6 +71,7 @@ const SignUp = () => {
             name: formData.name,
             username: formData.username,
             password: formData.password,
+            email: formData.email,
             gender,
           }),
           credentials: "include",
@@ -85,6 +82,7 @@ const SignUp = () => {
       if (response.ok) {
         showSuccessMessage(`Welcome ${formData.name}!`);
         setLogInUser(data.data);
+        navigate("/profile");
       } else {
         throw new Error(data.message);
       }
@@ -154,6 +152,20 @@ const SignUp = () => {
               value={formData.username}
               name="username"
               placeholder="jaimin123"
+              className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              onChange={handleChange}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Email
+            </label>
+            <input
+              type="text"
+              value={formData.email}
+              name="email"
+              placeholder="jaimin@gmail.com"
               className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
               onChange={handleChange}
             />

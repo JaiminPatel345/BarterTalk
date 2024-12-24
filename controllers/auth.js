@@ -57,9 +57,9 @@ const signup = async (req, res) => {
     await useGoogleSignup(req.body, res);
     return;
   }
-  const { name, username, password, gender } = req.body;
-  if (!name || !username || !password || !gender) {
-    return res.status(400).json({
+  const { name, username, password, gender, email } = req.body;
+  if (!name || !username || !password || !gender || !email) {
+    return res.status(401).json({
       message: "Please fill all the required fields",
     });
   }
@@ -91,6 +91,7 @@ const signup = async (req, res) => {
         username,
         password: hashedPassword,
         gender,
+        email,
         profileUrl,
       });
 
