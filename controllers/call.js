@@ -3,22 +3,24 @@ import { getReceiverSocketId, io } from "../socket/socket.js";
 
 const doCall = async (req, res) => {
   try {
-    const { toUserId, toName } = req.body;
+    const { toUserId, toName, peerId, remotePeerId } = req.body;
     const call = new Call({
       from: req.user._id,
       participants: [toUserId],
     });
     const dbCall = await call.save();
     const toUserSocketId = getReceiverSocketId(toUserId);
-    const temp = {
+    const payload = {
       fromUserId: req.user._id,
       fromName: req.user.name,
       toUserId,
       toName,
+      remotePeerId,
+      peerId,
       callId: dbCall._id,
     };
-    console.log(temp);
-    io.to(toUserSocketId).emit("video-call", temp);
+    console.log(payload);
+    io.to(toUserSocketId).emit("video-call", payload);
     res.json(dbCall);
   } catch (error) {
     console.log(error);

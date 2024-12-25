@@ -1,4 +1,9 @@
-const doVideoCall = async (selectedUser, showErrorMessage) => {
+const doVideoCall = async (
+  selectedUser,
+  showErrorMessage,
+  remotePeerId,
+  peerId,
+) => {
   const response = await fetch(
     `${import.meta.env.VITE_API_BASE_URL}/api/call`,
     {
@@ -10,6 +15,8 @@ const doVideoCall = async (selectedUser, showErrorMessage) => {
       body: JSON.stringify({
         toUserId: selectedUser._id,
         toName: selectedUser.name,
+        remotePeerId,
+        peerId,
       }),
     },
   );

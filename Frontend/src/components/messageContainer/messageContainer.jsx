@@ -16,7 +16,8 @@ const MessageContainer = () => {
   const [avatar, setAvatar] = useState("");
   const navigate = useNavigate();
   const { showErrorMessage } = useContext(FlashMessageContext);
-  const { setWithVideoCall, isIncomingCall } = UseVideoCall();
+  const { setWithVideoCall, isIncomingCall, setPeerId, setRemotePeerId } =
+    UseVideoCall();
   const [videoCallLoading, setVideoCallLoading] = useState(false);
 
   useEffect(() => {
@@ -34,7 +35,17 @@ const MessageContainer = () => {
     if (videoCallLoading) return;
     setVideoCallLoading(true);
     try {
-      doVideoCall(selectedConversation, showErrorMessage).then((data) => {
+      const myPeerId = Math.random().toString(36).slice(2); // Generate a peer ID
+      const myRemotePeerId = Math.random().toString(36).slice(2); // Generate a
+      // peer ID
+      setPeerId(myPeerId);
+      setRemotePeerId(myRemotePeerId);
+      doVideoCall(
+        selectedConversation,
+        showErrorMessage,
+        myPeerId,
+        myRemotePeerId,
+      ).then((data) => {
         setWithVideoCall(data.participants[0]);
         navigate("/video-call");
       });

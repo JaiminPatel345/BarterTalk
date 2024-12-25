@@ -46,6 +46,7 @@ const IncomingCall = () => {
 
   const handleAnswer = () => {
     setIsRinging(false);
+
     navigate("/video-call");
   };
 

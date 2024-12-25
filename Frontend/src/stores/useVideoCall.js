@@ -13,6 +13,12 @@ const UseVideoCall = create(
 
       withVideoCall: null,
       setWithVideoCall: (withVideoCall) => set({ withVideoCall }),
+
+      peerId: null,
+      setPeerId: (peerId) => set({ peerId }),
+
+      remotePeerId: null,
+      setRemotePeerId: (remotePeerId) => set({ remotePeerId }),
     }),
     {
       name: "video call", // unique name for localStorage key

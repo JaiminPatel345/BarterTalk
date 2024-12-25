@@ -65,11 +65,17 @@ const useSocket = create((set, get) => ({
     });
 
     socket.on("video-call", (data) => {
-      const { setIsIncomingCall, setWithVideoCall } = useVideoCall.getState();
+      const {
+        setIsIncomingCall,
+        setWithVideoCall,
+        setRemotePeerId,
+        setPeerId,
+      } = useVideoCall.getState();
       setIsIncomingCall(data.fromUserId);
       setWithVideoCall(data.fromName);
-
-      console.log(data);
+      setPeerId(data.peerId); // Store the caller's peer ID
+      setRemotePeerId(data.remotePeerId); // Store the caller's peer ID
+      // Generate a new peer ID for the receiver
     });
 
     socket.on("call-rejected", () => {
