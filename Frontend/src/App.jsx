@@ -5,7 +5,7 @@ import {
   createRoutesFromElements,
   RouterProvider,
 } from "react-router-dom";
-import { Home, Signup, Login, SetProfile } from "./pages";
+import { Home, Signup, Login, SetProfile, VideoCall } from "./pages";
 import FlashMessageProvider from "./context/flashMessageProvider";
 import FlashMessageDisplay from "./components/flashMessageDisplay";
 import AuthContextProvider from "./context/authContextProvider";
@@ -37,6 +37,7 @@ const myRouter = createBrowserRouter(
       <Route path="signup" element={<Signup />} />
       <Route path="profile" element={<SetProfile />} />
       <Route path="login" element={<Login />} />
+      <Route path="video-call" element={<VideoCall />} />
     </Route>,
   ),
 );

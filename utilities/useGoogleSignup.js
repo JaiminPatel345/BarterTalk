@@ -18,6 +18,7 @@ const useGoogleSignup = async (googleUser, res) => {
     name: googleUser.name || googleUser.given_name,
     email: googleUser.email,
     username: googleUser.email,
+    profileUrl: `https://avatar.iran.liara.run/public/boy?username=${googleUser.email}`,
   });
 
   const user = await newUser.save();

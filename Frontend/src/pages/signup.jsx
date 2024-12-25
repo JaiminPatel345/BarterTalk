@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import GenderCheckbox from "../components/generateCheckbox";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import { HashLoader } from "react-spinners";
 import FlashMessageContext from "../context/flashMessageContext";
 import AuthContext from "../context/authContext";

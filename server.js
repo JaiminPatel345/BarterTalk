@@ -1,27 +1,27 @@
-import express from "express"
-const PORT = process.env.PORT || 3000
-import "dotenv/config"
-import connectDB from "./utilities/db.js"
-import cookieParser from "cookie-parser"
-import cors from "cors"
-import session from "express-session"
+import express from "express";
+const PORT = process.env.PORT || 3000;
+import "dotenv/config";
+import connectDB from "./utilities/db.js";
+import cookieParser from "cookie-parser";
+import cors from "cors";
+import session from "express-session";
 // import redisStore from "./utilities/redis.js"
-import {app , server , io } from "./socket/socket.js"
+import { app, server, io } from "./socket/socket.js";
 
-connectDB()
-app.use(express.json())
-app.set("trust proxy", 1)
-app.use(cookieParser())
+connectDB();
+app.use(express.json());
+app.set("trust proxy", 1);
+app.use(cookieParser());
 
 app.use(
-    cors({
-        origin: process.env.REACT_APP_URL,
-        credentials: true,
-        methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-        allowedHeaders: ["Content-Type", "Authorization"],
-        exposedHeaders: ["set-cookie"],
-    })
-)
+  cors({
+    origin: process.env.REACT_APP_URL,
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    exposedHeaders: ["set-cookie"],
+  }),
+);
 
 // app.use(
 //     session({
@@ -41,25 +41,27 @@ app.use(
 // )
 
 //Routes
-import authRoute from "./routes/auth.js"
-import messageRoute from "./routes/message.js"
-import userRoute from "./routes/user.js"
+import authRoute from "./routes/auth.js";
+import messageRoute from "./routes/message.js";
+import userRoute from "./routes/user.js";
+import callRoute from "./routes/call.js";
 
-app.use("/api/message", messageRoute)
-app.use("/api/", authRoute)
-app.use("/api/", userRoute)
+app.use("/api/message", messageRoute);
+app.use("/api/call", callRoute);
+app.use("/api/", authRoute);
+app.use("/api/", userRoute);
 
 app.get("/", (req, res) => {
-    res.send("Hello World")
-})
+  res.send("Hello World");
+});
 
 app.use((error, req, res, next) => {
-    console.log("Jaimin", error)
-    res.status(error.status || 500).json({
-        message: error.message || "Unknown error",
-    })
-})
+  console.log("Jaimin", error);
+  res.status(error.status || 500).json({
+    message: error.message || "Unknown error",
+  });
+});
 
 server.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`)
-})
+  console.log(`Server is running on port ${PORT}`);
+});
