@@ -1,35 +1,24 @@
 import MessageInput from "./messageInput";
 import Messages from "./messages";
 import UseConversation from "../../stores/useConversation";
-import { useContext, useEffect, useState } from "react";
-import AuthContext from "../../context/authContext";
-import storeOrGetAvatar from "../../utils/avatar";
+import { useContext, useState } from "react";
 import { IconVideoPlus } from "@tabler/icons-react";
 import { useNavigate } from "react-router-dom";
 import FlashMessageContext from "../../context/flashMessageContext.jsx";
 import doVideoCall from "../../hooks/doVideoCall.js";
 import UseVideoCall from "../../stores/useVideoCall.js";
 import IncomingCall from "../incomingCall.jsx";
+import useAuthStore from "../../stores/useUser.js";
+import UseProfile from "../../stores/useProfile.js";
 
 const MessageContainer = () => {
   const { selectedConversation, setSelectedConversation } = UseConversation();
-  const [avatar, setAvatar] = useState("");
   const navigate = useNavigate();
   const { showErrorMessage } = useContext(FlashMessageContext);
   const { setWithVideoCall, isIncomingCall, setPeerId, setRemotePeerId } =
     UseVideoCall();
   const [videoCallLoading, setVideoCallLoading] = useState(false);
-
-  useEffect(() => {
-    const getAvatar = async () => {
-      let url = await storeOrGetAvatar(
-        selectedConversation?.profileUrl,
-        selectedConversation?._id,
-      );
-      setAvatar(url);
-    };
-    getAvatar();
-  }, [selectedConversation]);
+  const { getProfile } = UseProfile();
 
   const handelVideoCall = () => {
     if (videoCallLoading) return;
@@ -105,7 +94,10 @@ const MessageContainer = () => {
           <div className="flex items-center  gap-2">
             <div className="avatar">
               <div className="w-10 rounded-full">
-                <img alt={`Profile`} src={avatar} />
+                <img
+                  alt={`Profile`}
+                  src={getProfile(selectedConversation._id)}
+                />
               </div>
             </div>
             <div className="text-gray-900 font-bold">
@@ -133,7 +125,7 @@ const MessageContainer = () => {
 export default MessageContainer;
 
 const NoChatSelected = () => {
-  const { user } = useContext(AuthContext);
+  const { user } = useAuthStore();
   return (
     <div className="flex items-center justify-center w-full h-full">
       <div className="px-4 text-center sm:text-lg md:text-xl text-gray-200 font-semibold flex flex-col items-center gap-2">

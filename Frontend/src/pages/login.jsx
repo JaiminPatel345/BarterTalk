@@ -2,9 +2,9 @@ import { Link, useNavigate } from "react-router-dom";
 import { useContext, useState, useEffect } from "react";
 import { HashLoader } from "react-spinners";
 import FlashMessageContext from "../context/flashMessageContext";
-import AuthContext from "../context/authContext";
 import { GoogleLogin } from "@react-oauth/google";
 import setProfileFromGoogleLogin from "../hooks/setProfileFromGoogleLogin.js";
+import useAuthStore from "../stores/useUser.js";
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -15,7 +15,7 @@ const Login = () => {
 
   const { showSuccessMessage, showErrorMessage } =
     useContext(FlashMessageContext);
-  const { user, setLogInUser } = useContext(AuthContext);
+  const { user, setLogInUser } = useAuthStore();
   const navigate = useNavigate();
 
   useEffect(() => {

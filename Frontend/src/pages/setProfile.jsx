@@ -1,17 +1,21 @@
 import { useState, useRef, useContext } from "react";
 import { IconCameraRotate, IconUpload } from "@tabler/icons-react";
-import AuthContext from "../context/authContext.js";
 import { useNavigate } from "react-router-dom";
-import storeOrGetAvatar from "../utils/avatar.js";
+import useAuthStore from "../stores/useUser.js";
+import UseProfile from "../stores/useProfile.js";
+import FlashMessageContext from "../context/flashMessageContext.jsx";
 
 const SetProfile = () => {
   const [displayName, setDisplayName] = useState("");
-  const [photoPreview, setPhotoPreview] = useState(
-    "https://static.vecteezy.com/system/resources/previews/020/765/399/large_2x/default-profile-account-unknown-icon-black-silhouette-free-vector.jpg",
-  );
+  const { user } = useAuthStore();
+  const { updateProfile, getProfile } = UseProfile();
+  const [photoPreview, setPhotoPreview] = useState(getProfile(user._id));
+  const [newPhoto, setNewPhoto] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef(null);
-  const { setLogInUser } = useContext(AuthContext);
+  const { setLogInUser } = useAuthStore();
+  const { showErrorMessage } = useContext(FlashMessageContext);
+
   const navigate = useNavigate();
 
   const handlePhotoChange = async (e) => {
@@ -30,11 +34,11 @@ const SetProfile = () => {
       setIsUploading(true);
       const formData = new FormData();
       formData.append("file", file);
-      formData.append("upload_preset", import.meta.env.VITE_UPLOAD_PRESET); // Replace with your
-      // Cloudinary upload preset
+      formData.append("upload_preset", import.meta.env.VITE_UPLOAD_PRESET);
 
       const response = await fetch(
-        `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUD_NAME}/image/upload`, // Replace with your Cloudinary cloud name
+        // eslint-disable-next-line no-undef
+        `https://api.cloudinary.com/v1_1/${process.env.VITE_CLOUD_NAME}/image/upload`, // Replace with your Cloudinary cloud name
         {
           method: "POST",
           body: formData,
@@ -43,7 +47,9 @@ const SetProfile = () => {
 
       const data = await response.json();
       setPhotoPreview(data.secure_url);
+      setNewPhoto(data.secure_url);
     } catch (error) {
+      showErrorMessage(error.message || "Unknown error");
       console.log("Error uploading image:", error);
     } finally {
       setIsUploading(false);
@@ -59,11 +65,11 @@ const SetProfile = () => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            // Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
           credentials: "include",
           body: JSON.stringify({
-            profileUrl: photoPreview,
+            profileUrl: newPhoto || photoPreview,
             name: displayName,
           }),
         },
@@ -74,11 +80,11 @@ const SetProfile = () => {
       }
 
       const data = await response.json();
-      console.log(data);
       setLogInUser(data.user);
-      storeOrGetAvatar(data.user.profileUrl, data.user._id);
+      updateProfile(data.user._id, data.user.profileUrl);
       navigate("/");
     } catch (error) {
+      showErrorMessage(error.message || "Unknown error");
       console.log(error);
     }
   };

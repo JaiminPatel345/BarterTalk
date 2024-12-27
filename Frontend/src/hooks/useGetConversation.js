@@ -1,50 +1,54 @@
 import { useContext, useEffect, useState } from "react";
 import FlashMessageContext from "../context/flashMessageContext";
 import UseConversation from "../stores/useConversation";
+import useProfile from "../stores/useProfile.js";
+import useAuthStore from "../stores/useUser.js";
+import useConversation from "../stores/useConversation";
 
 const useGetConversations = () => {
-    const [conversations, setConversations] =
-        useState([])
-    const [loading, setLoading] = useState(true);
-    const {showErrorMessage} = useContext(FlashMessageContext)
-    const {setFilteredConversations} = UseConversation()
+  const { setConversations } = useConversation();
+  const [loading, setLoading] = useState(true);
+  const { user } = useAuthStore();
+  const { showErrorMessage } = useContext(FlashMessageContext);
+  const { setFilteredConversations } = UseConversation();
+  const { initializeAllProfiles, addProfile } = useProfile();
 
-    useEffect(() => {
-
-        const getConversations = async () => {
-            try {
-                const response = await fetch(
-                    // eslint-disable-next-line no-undef
-                    `${process.env.VITE_API_BASE_URL}/api/users`,
-                    {
-                        method: "GET",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        credentials: "include",
-                    }
-                )
-                const data = await response.json();
-                if(!response.ok){
-                    throw {
-                        message:data.message
-                    }
-                }
-                setConversations(data)
-                setFilteredConversations(data)
-                
-            } catch (error) {
-                showErrorMessage(error.message || "Unknown error")
-                console.log(error);
-                
-            }
-            setLoading(false);
+  useEffect(() => {
+    const getConversations = async () => {
+      try {
+        const response = await fetch(
+          // eslint-disable-next-line no-undef
+          `${process.env.VITE_API_BASE_URL}/api/users`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            credentials: "include",
+          },
+        );
+        const data = await response.json();
+        if (!response.ok) {
+          throw {
+            message: data.message,
+          };
         }
+        setConversations(data);
+        // console.log(data);
+        await initializeAllProfiles(data);
+        await addProfile(user?._id, user?.profileUrl);
+        setFilteredConversations(data);
+      } catch (error) {
+        showErrorMessage(error.message || "Unknown error");
+        console.log(error);
+      }
+      setLoading(false);
+    };
 
-        getConversations()
-    }, [])
-    
-    return { loading ,conversations }
-}
+    getConversations();
+  }, []);
+
+  return { loading };
+};
 
 export default useGetConversations;

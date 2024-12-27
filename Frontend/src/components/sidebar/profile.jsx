@@ -1,23 +1,20 @@
-import { useContext, useEffect, useState } from "react";
-import { IconSettings, IconCamera, IconMoodEdit } from "@tabler/icons-react";
+import { useEffect, useState } from "react";
+import { IconCamera, IconMoodEdit } from "@tabler/icons-react";
 import { useNavigate } from "react-router-dom";
-import AuthContext from "../../context/authContext";
-import storeOrGetAvatar from "../../utils/avatar";
 import Logout from "./logout";
+import useAuthStore from "../../stores/useUser.js";
+import UseProfile from "../../stores/useProfile.js";
 
 const Profile = () => {
-  const { user } = useContext(AuthContext);
-  const [avatar, setAvatar] = useState("");
+  const { user } = useAuthStore();
   const [showMenu, setShowMenu] = useState(false);
   const navigate = useNavigate();
+  const { getProfile, profiles } = UseProfile();
+  const [avatar, setAvatar] = useState(getProfile(user?._id));
 
   useEffect(() => {
-    const getAvatar = async () => {
-      let url = await storeOrGetAvatar(user.profileUrl, user._id);
-      setAvatar(url);
-    };
-    getAvatar();
-  }, [user]);
+    setAvatar(getProfile(user._id));
+  }, [getProfile, profiles]);
 
   const handleProfileClick = () => {
     navigate("/profile");
@@ -48,10 +45,11 @@ const Profile = () => {
         >
           <div className="avatar">
             <div className="bg-[#EDDDD6] mask mask-squircle w-12">
+              {/*<img src={user.profileUrl} alt="You" />*/}
               <img src={avatar} alt="You" />
             </div>
           </div>
-          <div className="text-md text-gray-400">{user.username}</div>
+          <div className="text-md text-gray-400">{user.name}</div>
         </div>
 
         {showMenu && (

@@ -1,4 +1,5 @@
 import User from "../models/user.js";
+import { io } from "../socket/socket.js";
 
 const getUsers = (req, res) => {
   const loggedInUserId = req.user._id;
@@ -16,6 +17,7 @@ const getUsers = (req, res) => {
       return res.json(users);
     })
     .catch((error) => {
+      console.log(error);
       res.status(error.status || 500).json({
         message: error.message,
       });
@@ -44,6 +46,8 @@ const UpdateProfile = (req, res) => {
   }
 
   if (!payload) {
+    console.log("No payload");
+    console.log(req.body);
     return res.status(400).json({
       message: "No data provided",
     });
@@ -59,6 +63,7 @@ const UpdateProfile = (req, res) => {
           status: 404,
         };
       }
+      io.emit("profile-update", user);
       return res.status(201).json({ user, message: "Updated successfully" });
     })
     .catch((error) => {

@@ -1,34 +1,21 @@
 /* eslint-disable react/prop-types */
 import { useEffect, useState } from "react";
 import UseConversation from "../../stores/useConversation";
-import storeOrGetAvatar from "../../utils/avatar";
 import useSocket from "../../stores/useSocket";
+import UseProfile from "../../stores/useProfile.js";
 const Conversation = ({ conversation, lastIndex }) => {
   const { selectedConversation, setSelectedConversation } = UseConversation();
   const { unreadMessages, clearUnreadMessage } = useSocket();
   const isSelected = selectedConversation?._id === conversation._id;
   const onlineUsers = useSocket((state) => state.onlineUsers);
   const isOnline = onlineUsers.includes(conversation._id);
-  const [avatar, setAvatar] = useState("");
   const [unreadMsg, setUnreadMsg] = useState("");
+  const { getProfile, profiles } = UseProfile();
+  const [avatar, setAvatar] = useState(getProfile(conversation?._id));
 
   useEffect(() => {
-    const getAvatar = async () => {
-      let url = await storeOrGetAvatar(
-        conversation.profileUrl,
-        conversation._id,
-      );
-      setAvatar(url);
-    };
-    getAvatar();
-  }, [conversation]);
-
-  // useEffect(() => {
-  //     const msg = unreadMessages.find(
-  //         (msg) => msg.senderId === conversation._id
-  //     )
-  //     setUnreadMsg(msg?.message)
-  // }, [unreadMessages, conversation._id])
+    setAvatar(getProfile(conversation?._id));
+  }, [selectedConversation, getProfile, profiles]);
 
   useEffect(() => {
     const newMsg = localStorage.getItem(`unread_${conversation._id}`);

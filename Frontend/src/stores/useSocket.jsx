@@ -1,12 +1,12 @@
 import { create } from "zustand";
 import { io } from "socket.io-client";
-import { useContext, useEffect } from "react";
-import AuthContext from "../context/authContext";
+import { useEffect } from "react";
 import useConversation from "./useConversation";
 import NotificationSound from "../assets/sounds/notification.mp3";
 import useVideoCall from "./useVideoCall.js";
-import { useNavigate } from "react-router-dom";
-import FlashMessageContext from "../context/flashMessageContext.jsx";
+import useAuthStore from "./useUser.js";
+import useProfileStore from "./useProfile.js";
+import UseConversation from "./useConversation";
 
 // Create the socket store
 const useSocket = create((set, get) => ({
@@ -61,6 +61,34 @@ const useSocket = create((set, get) => ({
         });
         const sound = new Audio(NotificationSound);
         sound.play();
+      }
+    });
+
+    socket.on("profile-update", async (data) => {
+      console.log(data);
+      try {
+        // Destructure needed state and methods from both stores
+        const profileStore = useProfileStore.getState();
+        const conversationStore = UseConversation.getState();
+
+        // Update profile in profile store
+        await profileStore.updateProfile(data._id, data.profileUrl);
+
+        // Update conversation in conversation store
+        await conversationStore.setConversations(
+          conversationStore.conversations.map((conversation) =>
+            conversation._id === data._id ? data : conversation,
+          ),
+        );
+
+        //update filter conversesions
+        await conversationStore.setFilteredConversations(
+          conversationStore.conversations.map((conversation) =>
+            conversation._id === data._id ? data : conversation,
+          ),
+        );
+      } catch (error) {
+        console.error("Error handling profile update:", error);
       }
     });
 
@@ -137,11 +165,11 @@ const useSocket = create((set, get) => ({
 // Custom hook for socket initialization
 export const useInitializeSocket = () => {
   const initializeSocket = useSocket((state) => state.initializeSocket);
-  const { user } = useContext(AuthContext);
+  const { user } = useAuthStore();
 
   useEffect(() => {
     const cleanup = initializeSocket(user);
-    // return () => cleanup?.();
+    return () => cleanup?.();
   }, [user, initializeSocket]);
 };
 

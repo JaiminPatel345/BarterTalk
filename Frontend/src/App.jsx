@@ -8,24 +8,21 @@ import {
 import { Home, Signup, Login, SetProfile, VideoCall } from "./pages";
 import FlashMessageProvider from "./context/flashMessageProvider";
 import FlashMessageDisplay from "./components/flashMessageDisplay";
-import AuthContextProvider from "./context/authContextProvider";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 
 import { Toaster } from "react-hot-toast";
 const Layout = () => {
   return (
     <GoogleOAuthProvider clientId={import.meta.env.VITE_APP_GOOGLE_CLIENT_ID}>
-      <AuthContextProvider>
-        <FlashMessageProvider>
-          <div className="min-h-screen relative">
-            <FlashMessageDisplay />
-            <Toaster />
-            <div className="flex justify-center items-center min-h-screen">
-              <Outlet />
-            </div>
+      <FlashMessageProvider>
+        <div className="min-h-screen relative">
+          <FlashMessageDisplay />
+          <Toaster />
+          <div className="flex justify-center items-center min-h-screen">
+            <Outlet />
           </div>
-        </FlashMessageProvider>
-      </AuthContextProvider>
+        </div>
+      </FlashMessageProvider>
     </GoogleOAuthProvider>
   );
 };

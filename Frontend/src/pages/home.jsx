@@ -1,14 +1,14 @@
 import { useCallback, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import AuthContext from "../context/authContext";
 import SideBar from "../components/sidebar/sideBar";
 import MessageContainer from "../components/messageContainer/messageContainer";
 import UseConversation from "../stores/useConversation";
 import { useInitializeSocket } from "../stores/useSocket";
 import FlashMessageContext from "../context/flashMessageContext.jsx";
+import useAuthStore from "../stores/useUser.js";
 
 const Home = () => {
-  const { user } = useContext(AuthContext);
+  const { user } = useAuthStore();
   const navigate = useNavigate();
   const { selectedConversation } = UseConversation();
   const [isResizing, setIsResizing] = useState(false);

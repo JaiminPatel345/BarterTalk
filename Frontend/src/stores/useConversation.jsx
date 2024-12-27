@@ -8,6 +8,9 @@ const UseConversation = create(
       setSelectedConversation: (selectedConversation) =>
         set({ selectedConversation }),
 
+      conversations: [],
+      setConversations: (conversations) => set({ conversations }),
+
       filteredConversations: null,
       setFilteredConversations: (filteredConversations) =>
         set({ filteredConversations }),

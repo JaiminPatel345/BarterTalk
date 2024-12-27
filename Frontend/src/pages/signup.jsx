@@ -3,9 +3,9 @@ import GenderCheckbox from "../components/generateCheckbox";
 import { useContext, useState } from "react";
 import { HashLoader } from "react-spinners";
 import FlashMessageContext from "../context/flashMessageContext";
-import AuthContext from "../context/authContext";
 import { GoogleLogin } from "@react-oauth/google";
 import setProfileFromGoogleSignup from "../hooks/setProfileFromGoogleSignup.js";
+import useAuthStore from "../stores/useUser.js";
 
 const SignUp = () => {
   const [formData, setFormData] = useState({
@@ -20,7 +20,7 @@ const SignUp = () => {
 
   const { showSuccessMessage, showErrorMessage } =
     useContext(FlashMessageContext);
-  const { setLogInUser } = useContext(AuthContext);
+  const { setLogInUser } = useAuthStore();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
