@@ -1,10 +1,8 @@
-import { useCallback, useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import SideBar from "../components/sidebar/sideBar";
 import MessageContainer from "../components/messageContainer/messageContainer";
 import UseConversation from "../stores/useConversation";
-import { useInitializeSocket } from "../stores/useSocket";
-import FlashMessageContext from "../context/flashMessageContext.jsx";
 import useAuthStore from "../stores/useUser.js";
 
 const Home = () => {
@@ -13,13 +11,6 @@ const Home = () => {
   const { selectedConversation } = UseConversation();
   const [isResizing, setIsResizing] = useState(false);
   const [sidebarWidth, setSidebarWidth] = useState(400);
-  const { showErrorMessage } = useContext(FlashMessageContext);
-  const handleCallRejected = useCallback(() => {
-    navigate("/");
-    showErrorMessage("Call rejected");
-  }, [navigate, showErrorMessage]);
-
-  useInitializeSocket(handleCallRejected);
 
   useEffect(() => {
     if (!user) {

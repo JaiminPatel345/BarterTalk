@@ -32,7 +32,6 @@ const rejectCall = async (req, res) => {
   try {
     const { cutTo } = req.body;
 
-    console.log(cutTo);
     const toUserSocketId = getReceiverSocketId(cutTo);
     io.to(toUserSocketId).emit("call-rejected");
     res.json({ message: "Call cut successfully", cutBy: req.user });
