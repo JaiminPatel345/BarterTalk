@@ -25,7 +25,7 @@ const doVideoCall = async (
     showErrorMessage(data.message || "Failed to initiate video call");
     return;
   }
-  return data;
+  return JSON.parse(data.message);
 };
 
 export default doVideoCall;

@@ -22,9 +22,7 @@ const userSocketMap = {};
 
 io.on("connection", (socket) => {
   const userId = socket.handshake.query.userId;
-  if (userId && userId != "undefined") {
-    userSocketMap[userId] = socket.id;
-  }
+  userSocketMap[userId] = socket.id;
 
   io.emit("getOnlineUsers", Object.keys(userSocketMap));
 

@@ -4,6 +4,8 @@ import { IconPhone, IconPhoneOff, IconUser } from "@tabler/icons-react";
 import useVideoCall from "../stores/useVideoCall.js";
 import rejectVideoCall from "../hooks/rejectVideoCall.js";
 import FlashMessageContext from "../context/flashMessageContext.jsx";
+import setAnswerCall from "../hooks/setAnswerCall.js";
+import UseConversation from "../stores/useConversation.jsx";
 
 const IncomingCall = () => {
   const [isRinging, setIsRinging] = useState(true);
@@ -15,7 +17,10 @@ const IncomingCall = () => {
     setIsIncomingCall,
     setWithVideoCall,
     setIsVideoCallConnected,
+    videoCallId,
+    messageId,
   } = useVideoCall();
+  const { messages, setMessages } = UseConversation();
   const { showSuccessMessage, showErrorMessage } =
     useContext(FlashMessageContext);
 
@@ -46,7 +51,16 @@ const IncomingCall = () => {
 
   const handleAnswer = () => {
     setIsRinging(false);
-
+    setAnswerCall(videoCallId, messageId).then(() => {
+      let lastMessage = messages[messages.length - 1];
+      if (lastMessage && lastMessage.isVideoCall) {
+        let callData = JSON.parse(lastMessage.message);
+        callData.isAnswer = true;
+        lastMessage.message = JSON.stringify(callData);
+        setMessages([messages.slice(0, messages.length - 1), lastMessage]);
+      }
+    });
+    setIsIncomingCall(false);
     navigate("/video-call");
   };
 

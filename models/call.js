@@ -12,6 +12,10 @@ const callSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
+    isAnswer: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

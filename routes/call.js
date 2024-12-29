@@ -6,5 +6,6 @@ import { protectRoute } from "../utilities/middleware.js";
 
 router.post("/", protectRoute, callController.doCall);
 router.post("/reject-call", protectRoute, callController.rejectCall);
+router.post("/answer-call", protectRoute, callController.acceptedCall);
 
 export default router;

@@ -24,9 +24,8 @@ const MessageContainer = () => {
     if (videoCallLoading) return;
     setVideoCallLoading(true);
     try {
-      const myPeerId = Math.random().toString(36).slice(2); // Generate a peer ID
-      const myRemotePeerId = Math.random().toString(36).slice(2); // Generate a
-      // peer ID
+      const myPeerId = Math.random().toString(36).slice(2);
+      const myRemotePeerId = Math.random().toString(36).slice(2);
       setPeerId(myPeerId);
       setRemotePeerId(myRemotePeerId);
       doVideoCall(
@@ -52,94 +51,109 @@ const MessageContainer = () => {
 
   if (!selectedConversation) {
     return (
-      <div
-        className={`${selectedConversation ? "w-screen" : "hidden md:block h-full w-full"}`}
-      >
+      <div className="hidden md:block h-full w-full">
         <NoChatSelected />
       </div>
     );
   }
-  return (
-    <div className="h-full w-full flex flex-col relative">
-      <div className={``}>
-        {/* Header */}
-        <div className="bg-blue-400 px-4 py-2 m-2 rounded-lg items-center  flex gap-4 ">
-          {videoCallLoading && (
-            <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-              <span className="loading loading-dots loading-lg"></span>
-            </div>
-          )}
-          <div
-            className="text-white hover:bg-blue-500 rounded-full p-2 cursor-pointer"
-            onClick={() => {
-              setSelectedConversation(null);
-            }}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="icon icon-tabler icons-tabler-outline icon-tabler-chevron-left"
-            >
-              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-              <path d="M15 6l-6 6l6 6" />
-            </svg>
-          </div>
-          <div className="flex items-center  gap-2">
-            <div className="avatar">
-              <div className="w-10 rounded-full">
-                <img
-                  alt={`Profile`}
-                  src={getProfile(selectedConversation._id)}
-                />
-              </div>
-            </div>
-            <div className="text-gray-900 font-bold">
-              {selectedConversation.name}{" "}
-            </div>
-            <div
-              className={`absolute right-32 text-white cursor-pointer bg-blue-600 rounded-full p-2`}
-              onClick={handelVideoCall}
-            >
-              <IconVideoPlus size={24} stroke={1.5} />
-            </div>
-          </div>
-        </div>
 
-        <div className="flex-1 h-full overflow-y-auto">
+  return (
+    <div className="h-screen flex flex-col ">
+      {/* Header */}
+      <div className="bg-blue-400 px-4 py-3 shadow-md">
+        {videoCallLoading && (
+          <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <span className="loading loading-dots loading-lg"></span>
+          </div>
+        )}
+
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <button
+              className="p-2 hover:bg-blue-500 rounded-full transition-colors"
+              onClick={() => setSelectedConversation(null)}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="text-white"
+              >
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M15 6l-6 6l6 6" />
+              </svg>
+            </button>
+
+            <div className="flex items-center gap-3">
+              <div className="avatar">
+                <div className="w-10 h-10 rounded-full ring-2 ring-white overflow-hidden">
+                  <img
+                    alt={`${selectedConversation.name}'s profile`}
+                    src={getProfile(selectedConversation._id)}
+                    className="object-cover w-full h-full"
+                  />
+                </div>
+              </div>
+              <span className="text-white font-semibold text-lg">
+                {selectedConversation.name}
+              </span>
+            </div>
+          </div>
+
+          <button
+            className="p-2.5 bg-blue-500 hover:bg-blue-600 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={handelVideoCall}
+            disabled={videoCallLoading}
+          >
+            <IconVideoPlus size={24} className="text-white" />
+          </button>
+        </div>
+      </div>
+
+      {/* Messages Area */}
+      <div className="flex-1 overflow-hidden relative">
+        <div className="absolute inset-0 overflow-y-auto px-4 py-4">
           <Messages />
         </div>
-        <div className={`absolute bottom-3 w-full`}>
-          <MessageInput />
-        </div>
+      </div>
+
+      {/* Message Input */}
+      <div className="p-4  border-t border-gray-200 shadow-inner">
+        <MessageInput />
       </div>
     </div>
   );
 };
-export default MessageContainer;
 
 const NoChatSelected = () => {
   const { user } = useAuthStore();
   return (
-    <div className="flex items-center justify-center w-full h-full">
-      <div className="px-4 text-center sm:text-lg md:text-xl text-gray-200 font-semibold flex flex-col items-center gap-2">
-        <p>Welcome 👋 {user.name} </p>
-        <p>Select a chat to start messaging</p>
-        <div>
+    <div className="flex items-center justify-center w-full h-full ">
+      <div className="text-center flex flex-col items-center gap-6 p-6 max-w-md mx-auto">
+        <div className="space-y-3">
+          <p className="text-2xl font-semibold text-gray-50">
+            Welcome, {user.name} 👋
+          </p>
+          <p className="text-gray-500 text-lg">
+            Select a chat to start messaging
+          </p>
+        </div>
+
+        <div className="text-blue-400 opacity-80">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            width="100"
-            height="100"
+            width="120"
+            height="120"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            strokeWidth="2"
+            strokeWidth="1.5"
             strokeLinecap="round"
             strokeLinejoin="round"
           >
@@ -156,3 +170,5 @@ const NoChatSelected = () => {
     </div>
   );
 };
+
+export default MessageContainer;

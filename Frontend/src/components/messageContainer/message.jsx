@@ -4,6 +4,7 @@ import { extractTime } from "../../utils/extractTime";
 import useAuthStore from "../../stores/useUser.js";
 import UseProfile from "../../stores/useProfile.js";
 import { useEffect, useState } from "react";
+import { IconClock, IconVideo, IconVideoOff } from "@tabler/icons-react";
 
 const Message = ({ message }) => {
   const { selectedConversation } = UseConversation();
@@ -17,6 +18,9 @@ const Message = ({ message }) => {
   useEffect(() => {
     setAvatar(getProfile(isSendByMe ? user?._id : selectedConversation._id));
   });
+
+  if (message.isVideoCall)
+    return <VideoCallMessage message={message} isSendByMe={isSendByMe} />;
 
   return (
     <>
@@ -35,6 +39,63 @@ const Message = ({ message }) => {
         </div>
       </div>
     </>
+  );
+};
+
+const VideoCallMessage = ({ message, isSendByMe }) => {
+  const videoCallInfo = JSON.parse(message.message);
+  const time = new Date(videoCallInfo.createdAt).toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  const { messages } = UseConversation();
+  const [isPickUp, setIsPickUp] = useState(videoCallInfo.isAnswer);
+
+  useEffect(() => {
+    setIsPickUp(videoCallInfo.isAnswer);
+  }, [messages]);
+
+  return (
+    <div
+      className={`flex ${isSendByMe ? "justify-end" : "justify-start"} my-2 w-full`}
+    >
+      <div
+        className={`
+        flex items-center gap-2 px-4 py-2 rounded-lg
+        ${
+          isSendByMe
+            ? "bg-blue-500 text-white rounded-br-none"
+            : "bg-gray-100 text-gray-800 rounded-bl-none"
+        }
+        max-w-[80%] shadow-sm hover:shadow-md transition-shadow
+      `}
+      >
+        <div className="rounded-full p-2 bg-opacity-20 bg-white">
+          {isPickUp ? (
+            <IconVideo
+              className={`w-5 h-5 ${isSendByMe ? "text-white" : "text-blue-500"}`}
+              stroke={2}
+            />
+          ) : (
+            <IconVideoOff
+              className={`w-5 h-5 ${isSendByMe ? "text-white" : "text-red-500"}`}
+              stroke={2}
+            />
+          )}
+        </div>
+
+        <div className="flex flex-col">
+          <span className="font-medium">
+            {isPickUp ? "Video Call" : "Miss  Call"}
+          </span>
+
+          <div className="flex items-center gap-2 text-sm opacity-90">
+            <IconClock className="w-4 h-4" stroke={2} />
+            <span>{time}</span>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 
