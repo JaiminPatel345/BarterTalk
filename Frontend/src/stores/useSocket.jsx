@@ -92,27 +92,24 @@ const useSocket = create((set, get) => ({
       const {
         setIsIncomingCall,
         setWithVideoCall,
-        setRemotePeerId,
-        setPeerId,
+        setAnotherPeerId,
+        setMyPeerId,
         setVideoCallId,
         setMessageId,
       } = useVideoCall.getState();
       setIsIncomingCall(data.fromUserId);
       setWithVideoCall(data.fromName);
-      setPeerId(data.peerId);
-      setRemotePeerId(data.remotePeerId);
+      setMyPeerId(data.peerId);
+      setAnotherPeerId(data.remotePeerId);
       setVideoCallId(data.callId);
       setMessageId(data.messageId);
     });
 
     socket.on("call-rejected", () => {
-      const { setIsIncomingCall, setWithVideoCall, setIsVideoCallConnected } =
-        useVideoCall.getState();
+      const { resetAll } = useVideoCall.getState();
       const navigationFunction = get().navigationFunction;
 
-      setIsIncomingCall(false);
-      setWithVideoCall(null);
-      setIsVideoCallConnected(false);
+      resetAll();
       console.log("call cut ");
 
       if (navigationFunction) {

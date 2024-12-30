@@ -1,214 +1,272 @@
-import { useState, useEffect, useRef, useContext } from "react";
+import { useEffect, useRef, useState } from "react";
+import { Camera, CameraOff, Mic, MicOff, PhoneOff } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import UseVideoCall from "../stores/useVideoCall.js";
 import { Peer } from "peerjs";
-import { v4 as uuidv4 } from "uuid";
-import FlashMessageContext from "../context/flashMessageContext.jsx";
-import {
-  IconMicrophone,
-  IconMicrophoneOff,
-  IconVideo,
-  IconVideoOff,
-  IconPhone,
-  IconPhoneOff,
-} from "@tabler/icons-react";
 
 const VideoCall = () => {
-  const [peerId, setPeerId] = useState("");
-  const [remotePeerId, setRemotePeerId] = useState("");
-  const [remoteStream, setRemoteStream] = useState(null);
-  const [isAudioEnabled, setIsAudioEnabled] = useState(true);
-  const [isVideoEnabled, setIsVideoEnabled] = useState(true);
-  const [localStream, setLocalStream] = useState(null);
-  const localVideoRef = useRef(null);
+  const [myVideoStream, setMyVideoStream] = useState(null);
+  const [isMuted, setIsMuted] = useState(false);
+  const [isCameraOff, setIsCameraOff] = useState(false);
+  const [permissionDenied, setPermissionDenied] = useState(false);
+  const [isConnected, setIsConnected] = useState(false);
+  const myVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
-  const peer = useRef(null);
-  const currentCall = useRef(null);
-  const { showErrorMessage } = useContext(FlashMessageContext);
+  const peerRef = useRef(null);
+  const connectionRef = useRef(null);
+  const navigate = useNavigate();
+  const { myPeerId, anotherPeerId } = UseVideoCall();
 
+  // Initialize peer connection
   useEffect(() => {
-    peer.current = new Peer(uuidv4());
-    peer.current.on("open", (id) => {
-      setPeerId(id);
-    });
+    if (!myPeerId || !anotherPeerId) return;
 
-    peer.current.on("call", (call) => {
-      navigator.mediaDevices
-        .getUserMedia({ video: true, audio: true })
-        .then((stream) => {
-          setLocalStream(stream);
-          if (localVideoRef.current) {
-            localVideoRef.current.srcObject = stream;
-          }
-          call.answer(stream);
-          currentCall.current = call;
-          call.on("stream", (remoteStream) => {
-            setRemoteStream(remoteStream);
-          });
-        })
-        .catch((err) => console.error("Failed to get local stream:", err));
-    });
-
-    return () => {
-      peer.current?.destroy();
-    };
-  }, []);
-
-  useEffect(() => {
-    if (remoteStream && remoteVideoRef.current) {
-      remoteVideoRef.current.srcObject = remoteStream;
-    }
-  }, [remoteStream]);
-
-  const makeCall = () => {
-    if (!remotePeerId) {
-      showErrorMessage("Please enter a peer ID to call.");
-      return;
-    }
-
-    navigator.mediaDevices
-      .getUserMedia({ video: true, audio: true })
-      .then((stream) => {
-        setLocalStream(stream);
-        if (localVideoRef.current) {
-          localVideoRef.current.srcObject = stream;
-        }
-        const call = peer.current.call(remotePeerId, stream);
-        currentCall.current = call;
-        call.on("stream", (remoteStream) => {
-          setRemoteStream(remoteStream);
+    const initPeer = async () => {
+      try {
+        // Create new peer instance
+        const peer = new Peer(myPeerId, {
+          config: {
+            iceServers: [
+              { urls: "stun:stun.l.google.com:19302" },
+              { urls: "stun:stun1.l.google.com:19302" },
+            ],
+          },
         });
-      })
-      .catch((err) => console.error("Failed to get local stream:", err));
+
+        peerRef.current = peer;
+
+        // Handle peer open event
+        peer.on("open", (id) => {
+          console.log("My peer ID is:", id);
+          startCall();
+        });
+
+        // Handle incoming calls
+        peer.on("call", handleIncomingCall);
+
+        // Handle peer errors
+        peer.on("error", (error) => {
+          console.error("Peer connection error:", error);
+          setIsConnected(false);
+        });
+      } catch (error) {
+        console.error("Failed to initialize peer:", error);
+      }
+    };
+
+    initPeer();
+
+    // Cleanup
+    return () => {
+      if (connectionRef.current) {
+        connectionRef.current.close();
+      }
+      if (peerRef.current) {
+        peerRef.current.destroy();
+      }
+      if (myVideoStream) {
+        myVideoStream.getTracks().forEach((track) => track.stop());
+      }
+    };
+  }, [myPeerId, anotherPeerId]);
+
+  // Get user media stream
+  const getMediaStream = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+        video: {
+          width: { ideal: 1920 },
+          height: { ideal: 1080 },
+          aspectRatio: 16 / 9,
+        },
+      });
+      setMyVideoStream(stream);
+      if (myVideoRef.current) {
+        myVideoRef.current.srcObject = stream;
+      }
+      setPermissionDenied(false);
+      return stream;
+    } catch (err) {
+      console.error("Error accessing media devices:", err);
+      if (err.name === "NotAllowedError") {
+        setPermissionDenied(true);
+      }
+      throw err;
+    }
   };
 
-  const disconnectCall = () => {
-    if (currentCall.current) {
-      currentCall.current.close();
-      currentCall.current = null;
-      setRemoteStream(null);
-      if (remoteVideoRef.current) {
-        remoteVideoRef.current.srcObject = null;
-      }
-      if (localVideoRef.current) {
-        localVideoRef.current.srcObject = null;
-      }
-      if (localStream) {
-        localStream.getTracks().forEach((track) => track.stop());
-      }
+  // Handle incoming calls
+  const handleIncomingCall = async (call) => {
+    try {
+      const stream = await getMediaStream();
+      call.answer(stream);
+
+      call.on("stream", (remoteStream) => {
+        if (remoteVideoRef.current) {
+          remoteVideoRef.current.srcObject = remoteStream;
+          setIsConnected(true);
+        }
+      });
+
+      connectionRef.current = call;
+    } catch (error) {
+      console.error("Error handling incoming call:", error);
     }
+  };
+
+  // Start outgoing call
+  const startCall = async () => {
+    if (!peerRef.current || !anotherPeerId) return;
+
+    try {
+      const stream = await getMediaStream();
+      const call = peerRef.current.call(anotherPeerId, stream);
+
+      call.on("stream", (remoteStream) => {
+        if (remoteVideoRef.current) {
+          remoteVideoRef.current.srcObject = remoteStream;
+          setIsConnected(true);
+        }
+      });
+
+      connectionRef.current = call;
+    } catch (error) {
+      console.error("Error starting call:", error);
+    }
+  };
+
+  // Retry connection
+  const retryConnection = () => {
+    if (connectionRef.current) {
+      connectionRef.current.close();
+    }
+    if (peerRef.current) {
+      peerRef.current.destroy();
+    }
+    startCall();
   };
 
   const toggleAudio = () => {
-    if (localStream) {
-      const audioTrack = localStream.getAudioTracks()[0];
+    if (myVideoStream) {
+      const audioTrack = myVideoStream.getAudioTracks()[0];
       if (audioTrack) {
-        audioTrack.enabled = !isAudioEnabled;
-        setIsAudioEnabled(!isAudioEnabled);
+        audioTrack.enabled = !audioTrack.enabled;
+        setIsMuted(!isMuted);
       }
     }
   };
 
   const toggleVideo = () => {
-    if (localStream) {
-      const videoTrack = localStream.getVideoTracks()[0];
+    if (myVideoStream) {
+      const videoTrack = myVideoStream.getVideoTracks()[0];
       if (videoTrack) {
-        videoTrack.enabled = !isVideoEnabled;
-        setIsVideoEnabled(!isVideoEnabled);
+        videoTrack.enabled = !videoTrack.enabled;
+        setIsCameraOff(!isCameraOff);
       }
     }
   };
 
-  return (
-    <div className="flex flex-col items-center justify-center min-h-screen w-full bg-gray-900 text-white">
-      <div className="relative w-full max-w-4xl aspect-video">
-        {/* Main Video (Remote) */}
-        <div className="w-full h-full bg-gray-800 rounded-lg overflow-hidden">
-          <video
-            ref={remoteVideoRef}
-            autoPlay
-            className="w-full h-full object-cover"
-          ></video>
-        </div>
+  const handleEndCall = () => {
+    if (myVideoStream) {
+      myVideoStream.getTracks().forEach((track) => track.stop());
+    }
+    if (connectionRef.current) {
+      connectionRef.current.close();
+    }
+    if (peerRef.current) {
+      peerRef.current.destroy();
+    }
+    navigate("/");
+  };
 
-        {/* Picture-in-Picture (Local) */}
-        <div className="absolute bottom-4 right-4 w-48 aspect-video">
-          <div className="w-full h-full bg-gray-800 rounded-lg overflow-hidden border-2 border-gray-700">
-            <video
-              ref={localVideoRef}
-              autoPlay
-              muted
-              className="w-full h-full object-cover"
-            ></video>
-          </div>
-        </div>
-
-        {/* Controls Overlay */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-gray-900/90 to-transparent">
-          <div className="flex items-center justify-between max-w-lg mx-auto">
-            {/* Audio Control */}
-            <button
-              onClick={toggleAudio}
-              className={`p-3 rounded-full ${
-                isAudioEnabled
-                  ? "bg-gray-700 hover:bg-gray-600"
-                  : "bg-red-500 hover:bg-red-600"
-              }`}
-            >
-              {isAudioEnabled ? (
-                <IconMicrophone className="w-6 h-6" />
-              ) : (
-                <IconMicrophoneOff className="w-6 h-6" />
-              )}
-            </button>
-
-            {/* Video Control */}
-            <button
-              onClick={toggleVideo}
-              className={`p-3 rounded-full ${
-                isVideoEnabled
-                  ? "bg-gray-700 hover:bg-gray-600"
-                  : "bg-red-500 hover:bg-red-600"
-              }`}
-            >
-              {isVideoEnabled ? (
-                <IconVideo className="w-6 h-6" />
-              ) : (
-                <IconVideoOff className="w-6 h-6" />
-              )}
-            </button>
-
-            {/* Call Control */}
-            <button
-              onClick={currentCall.current ? disconnectCall : makeCall}
-              className={`p-3 rounded-full ${
-                currentCall.current
-                  ? "bg-red-500 hover:bg-red-600"
-                  : "bg-green-500 hover:bg-green-600"
-              }`}
-            >
-              {currentCall.current ? (
-                <IconPhoneOff className="w-6 h-6" />
-              ) : (
-                <IconPhone className="w-6 h-6" />
-              )}
-            </button>
-          </div>
+  const NoPermission = () => (
+    <div className="fixed flex items-center justify-center h-screen w-screen z-50 backdrop-blur-lg">
+      <div className="bg-gray-800 p-6 rounded-lg shadow-lg max-w-md mx-4 text-center">
+        <h2 className="text-xl text-white font-semibold mb-4">
+          Camera and Microphone Access Required
+        </h2>
+        <p className="text-red-500 mb-6">
+          Please allow access to your camera and microphone in your browser
+          settings to use the video call feature.
+        </p>
+        <div className="space-y-4">
+          <button
+            onClick={retryConnection}
+            className="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+          >
+            Try Again
+          </button>
+          <button
+            onClick={() => navigate("/")}
+            className="w-full bg-gray-700 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+          >
+            Go Back
+          </button>
         </div>
       </div>
+    </div>
+  );
 
-      {/* Peer ID Input Section */}
-      <div className="mt-6 bg-gray-800 p-4 rounded-lg">
-        <div className="mb-4">
-          <p className="text-sm text-gray-400">Your Peer ID:</p>
-          <p className="font-mono bg-gray-700 p-2 rounded">{peerId}</p>
-        </div>
-        <div className="flex gap-2">
-          <input
-            type="text"
-            placeholder="Enter Remote Peer ID"
-            className="p-2 rounded bg-gray-700 text-white w-64"
-            value={remotePeerId}
-            onChange={(e) => setRemotePeerId(e.target.value)}
+  return (
+    <div className="flex items-center justify-center min-h-screen w-full backdrop-blur-md">
+      {permissionDenied && <NoPermission />}
+      <div className="relative w-full h-full md:h-auto md:aspect-video md:max-w-6xl md:mx-4 lg:mx-auto">
+        <div className="relative w-full h-screen md:h-full bg-black md:rounded-lg overflow-hidden">
+          <video
+            ref={remoteVideoRef}
+            className="absolute inset-0 w-full h-full object-cover"
+            playsInline
+            autoPlay
           />
+
+          <div className="absolute top-4 right-4 w-32 sm:w-40 md:w-48 aspect-video bg-gray-800 rounded-lg overflow-hidden border-2 border-gray-700 shadow-lg">
+            <video
+              ref={myVideoRef}
+              className="w-full h-full object-cover"
+              playsInline
+              muted
+              autoPlay
+            />
+          </div>
+
+          <div className="fixed md:absolute bottom-8 left-1/2 transform -translate-x-1/2 flex items-center gap-2 sm:gap-4 p-3 sm:p-4 bg-gray-800 bg-opacity-60 rounded-full backdrop-blur-sm shadow-lg">
+            <button
+              onClick={toggleAudio}
+              className={`p-2 sm:p-4 rounded-full ${
+                isMuted ? "bg-red-500" : "bg-gray-700"
+              } hover:bg-opacity-80 transition-all active:scale-95`}
+              aria-label={isMuted ? "Unmute" : "Mute"}
+            >
+              {isMuted ? (
+                <MicOff className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+              ) : (
+                <Mic className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+              )}
+            </button>
+
+            <button
+              onClick={toggleVideo}
+              className={`p-2 sm:p-4 rounded-full ${
+                isCameraOff ? "bg-red-500" : "bg-gray-700"
+              } hover:bg-opacity-80 transition-all active:scale-95`}
+              aria-label={isCameraOff ? "Turn Camera On" : "Turn Camera Off"}
+            >
+              {isCameraOff ? (
+                <CameraOff className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+              ) : (
+                <Camera className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+              )}
+            </button>
+
+            <button
+              className="p-2 sm:p-4 rounded-full bg-red-500 hover:bg-red-600 transition-all active:scale-95"
+              onClick={handleEndCall}
+              aria-label="End Call"
+            >
+              <PhoneOff className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+            </button>
+          </div>
         </div>
       </div>
     </div>

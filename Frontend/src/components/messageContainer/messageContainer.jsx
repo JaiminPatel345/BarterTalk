@@ -15,7 +15,7 @@ const MessageContainer = () => {
   const { selectedConversation, setSelectedConversation } = UseConversation();
   const navigate = useNavigate();
   const { showErrorMessage } = useContext(FlashMessageContext);
-  const { setWithVideoCall, isIncomingCall, setPeerId, setRemotePeerId } =
+  const { setWithVideoCall, isIncomingCall, setMyPeerId, setAnotherPeerId } =
     UseVideoCall();
   const [videoCallLoading, setVideoCallLoading] = useState(false);
   const { getProfile } = UseProfile();
@@ -24,17 +24,13 @@ const MessageContainer = () => {
     if (videoCallLoading) return;
     setVideoCallLoading(true);
     try {
-      const myPeerId = Math.random().toString(36).slice(2);
-      const myRemotePeerId = Math.random().toString(36).slice(2);
-      setPeerId(myPeerId);
-      setRemotePeerId(myRemotePeerId);
-      doVideoCall(
-        selectedConversation,
-        showErrorMessage,
-        myPeerId,
-        myRemotePeerId,
-      ).then((data) => {
-        setWithVideoCall(data.participants[0]);
+      doVideoCall(selectedConversation, showErrorMessage).then((data) => {
+        console.log("PeerId from server", data.peerId);
+        setMyPeerId(data.peerId);
+        console.log("remote PeerId from server", data.remotePeerId);
+        setAnotherPeerId(data.remotePeerId);
+        const DbMessage = JSON.parse(data.dbCallMessage.message);
+        setWithVideoCall(DbMessage.participants[0]);
         navigate("/video-call");
       });
     } catch (e) {

@@ -14,17 +14,27 @@ const UseVideoCall = create(
       withVideoCall: null,
       setWithVideoCall: (withVideoCall) => set({ withVideoCall }),
 
-      peerId: null,
-      setPeerId: (peerId) => set({ peerId }),
+      myPeerId: null,
+      setMyPeerId: (myPeerId) => set({ myPeerId }),
 
-      remotePeerId: null,
-      setRemotePeerId: (remotePeerId) => set({ remotePeerId }),
+      anotherPeerId: null,
+      setAnotherPeerId: (anotherPeerId) => set({ anotherPeerId }),
 
+      //A call _id in which video call save
       videoCallId: null,
       setVideoCallId: (videoCallId) => set({ videoCallId }),
 
+      //A message id in which this video call save
       messageId: null,
       setMessageId: (messageId) => set({ messageId }),
+
+      resetAll: () => {
+        set({ isIncomingCall: false });
+        set({ isVideoCallConnected: false });
+        set({ withVideoCall: null });
+        set({ myPeerId: null });
+        set({ anotherPeerId: null });
+      },
     }),
     {
       name: "video call", // unique name for localStorage key

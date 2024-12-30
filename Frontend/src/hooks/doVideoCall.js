@@ -1,9 +1,4 @@
-const doVideoCall = async (
-  selectedUser,
-  showErrorMessage,
-  remotePeerId,
-  peerId,
-) => {
+const doVideoCall = async (selectedUser, showErrorMessage) => {
   const response = await fetch(
     `${import.meta.env.VITE_API_BASE_URL}/api/call`,
     {
@@ -15,8 +10,6 @@ const doVideoCall = async (
       body: JSON.stringify({
         toUserId: selectedUser._id,
         toName: selectedUser.name,
-        remotePeerId,
-        peerId,
       }),
     },
   );
@@ -25,7 +18,7 @@ const doVideoCall = async (
     showErrorMessage(data.message || "Failed to initiate video call");
     return;
   }
-  return JSON.parse(data.message);
+  return data;
 };
 
 export default doVideoCall;
