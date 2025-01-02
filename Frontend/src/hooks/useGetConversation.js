@@ -1,7 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import FlashMessageContext from "../context/flashMessageContext";
 import UseConversation from "../stores/useConversation";
-import useProfile from "../stores/useProfile.js";
 import useAuthStore from "../stores/useUser.js";
 import useConversation from "../stores/useConversation";
 
@@ -11,7 +10,6 @@ const useGetConversations = () => {
   const { user } = useAuthStore();
   const { showErrorMessage } = useContext(FlashMessageContext);
   const { setFilteredConversations } = UseConversation();
-  const { initializeAllProfiles, addProfile } = useProfile();
 
   useEffect(() => {
     const getConversations = async () => {
@@ -35,8 +33,6 @@ const useGetConversations = () => {
         }
         setConversations(data);
         // console.log(data);
-        await initializeAllProfiles(data);
-        await addProfile(user?._id, user?.profileUrl);
         setFilteredConversations(data);
       } catch (error) {
         showErrorMessage(error.message || "Unknown error");

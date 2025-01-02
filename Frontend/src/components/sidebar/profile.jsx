@@ -3,18 +3,12 @@ import { IconCamera, IconMoodEdit } from "@tabler/icons-react";
 import { useNavigate } from "react-router-dom";
 import Logout from "./logout";
 import useAuthStore from "../../stores/useUser.js";
-import UseProfile from "../../stores/useProfile.js";
 
 const Profile = () => {
   const { user } = useAuthStore();
   const [showMenu, setShowMenu] = useState(false);
   const navigate = useNavigate();
-  const { getProfile, profiles } = UseProfile();
-  const [avatar, setAvatar] = useState(getProfile(user?._id));
-
-  useEffect(() => {
-    setAvatar(getProfile(user._id));
-  }, [getProfile, profiles]);
+  const avatar = user?.profileUrl;
 
   const handleProfileClick = () => {
     navigate("/profile");

@@ -2,7 +2,6 @@
 import UseConversation from "../../stores/useConversation";
 import { extractTime } from "../../utils/extractTime";
 import useAuthStore from "../../stores/useUser.js";
-import UseProfile from "../../stores/useProfile.js";
 import { useEffect, useState } from "react";
 import { IconClock, IconVideo, IconVideoOff } from "@tabler/icons-react";
 
@@ -12,12 +11,11 @@ const Message = ({ message }) => {
   const isSendByMe =
     message?.receiverId?.toString() === selectedConversation._id?.toString();
   const shakeClass = message.shouldShake ? "shake" : "";
-  const { getProfile } = UseProfile();
   const [avatar, setAvatar] = useState();
 
   useEffect(() => {
-    setAvatar(getProfile(isSendByMe ? user?._id : selectedConversation._id));
-  });
+    setAvatar(isSendByMe ? user?.profileUrl : selectedConversation.profileUrl);
+  }, []);
 
   if (message.isVideoCall)
     return <VideoCallMessage message={message} isSendByMe={isSendByMe} />;

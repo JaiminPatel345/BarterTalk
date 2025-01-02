@@ -2,14 +2,12 @@ import { useState, useRef, useContext } from "react";
 import { IconCameraRotate, IconUpload } from "@tabler/icons-react";
 import { useNavigate } from "react-router-dom";
 import useAuthStore from "../stores/useUser.js";
-import UseProfile from "../stores/useProfile.js";
 import FlashMessageContext from "../context/flashMessageContext.jsx";
 
 const SetProfile = () => {
   const [displayName, setDisplayName] = useState("");
   const { user } = useAuthStore();
-  const { updateProfile, getProfile } = UseProfile();
-  const [photoPreview, setPhotoPreview] = useState(getProfile(user._id));
+  const [photoPreview, setPhotoPreview] = useState(user.profileUrl);
   const [newPhoto, setNewPhoto] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef(null);
@@ -81,7 +79,7 @@ const SetProfile = () => {
 
       const data = await response.json();
       setLogInUser(data.user);
-      updateProfile(data.user._id, data.user.profileUrl);
+
       navigate("/");
     } catch (error) {
       showErrorMessage(error.message || "Unknown error");

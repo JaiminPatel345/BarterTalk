@@ -5,7 +5,6 @@ import useConversation from "./useConversation";
 import NotificationSound from "../assets/sounds/notification.mp3";
 import useVideoCall from "./useVideoCall.js";
 import useAuthStore from "./useUser.js";
-import useProfileStore from "./useProfile.js";
 import UseConversation from "./useConversation";
 import { useNavigate } from "react-router-dom";
 
@@ -67,10 +66,7 @@ const useSocket = create((set, get) => ({
 
     socket.on("profile-update", async (data) => {
       try {
-        const profileStore = useProfileStore.getState();
         const conversationStore = UseConversation.getState();
-
-        await profileStore.updateProfile(data._id, data.profileUrl);
 
         await conversationStore.setConversations(
           conversationStore.conversations.map((conversation) =>
@@ -111,6 +107,29 @@ const useSocket = create((set, get) => ({
 
       resetAll();
       console.log("call cut ");
+
+      if (navigationFunction) {
+        navigationFunction("/");
+      }
+    });
+
+    socket.on("call-end", (data) => {
+      const navigationFunction = get().navigationFunction;
+
+      const {
+        setIsIncomingCall,
+        setWithVideoCall,
+        setAnotherPeerId,
+        setMyPeerId,
+        setVideoCallId,
+        setMessageId,
+      } = useVideoCall.getState();
+      setIsIncomingCall(data.fromUserId);
+      setWithVideoCall(data.fromName);
+      setMyPeerId(data.peerId);
+      setAnotherPeerId(data.remotePeerId);
+      setVideoCallId(data.callId);
+      setMessageId(data.messageId);
 
       if (navigationFunction) {
         navigationFunction("/");

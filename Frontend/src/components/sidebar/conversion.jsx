@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react";
 import UseConversation from "../../stores/useConversation";
 import useSocket from "../../stores/useSocket";
-import UseProfile from "../../stores/useProfile.js";
 const Conversation = ({ conversation, lastIndex }) => {
   const { selectedConversation, setSelectedConversation } = UseConversation();
   const { unreadMessages, clearUnreadMessage } = useSocket();
@@ -10,12 +9,11 @@ const Conversation = ({ conversation, lastIndex }) => {
   const onlineUsers = useSocket((state) => state.onlineUsers);
   const isOnline = onlineUsers.includes(conversation._id);
   const [unreadMsg, setUnreadMsg] = useState("");
-  const { getProfile, profiles } = UseProfile();
-  const [avatar, setAvatar] = useState(getProfile(conversation?._id));
+  const [avatar, setAvatar] = useState(conversation?.profileUrl);
 
   useEffect(() => {
-    setAvatar(getProfile(conversation?._id));
-  }, [selectedConversation, getProfile, profiles]);
+    setAvatar(conversation?.profileUrl);
+  }, [conversation]);
 
   useEffect(() => {
     const newMsg = localStorage.getItem(`unread_${conversation._id}`);
