@@ -15,7 +15,7 @@ app.use(cookieParser());
 
 app.use(
   cors({
-    origin: process.env.REACT_APP_URL,
+    origin: [process.env.REACT_APP_URL, process.env.REACT_APP_URL2],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -56,7 +56,7 @@ app.get("/", (req, res) => {
 });
 
 app.use((error, req, res, next) => {
-  console.log("Jaimin", error);
+  console.log("Error at end : ", error);
   res.status(error.status || 500).json({
     message: error.message || "Unknown error",
   });
