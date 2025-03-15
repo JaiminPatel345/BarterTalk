@@ -9,6 +9,9 @@ const VideoCall = () => {
   const [isMuted, setIsMuted] = useState(false);
   const [isCameraOff, setIsCameraOff] = useState(false);
   const [permissionDenied, setPermissionDenied] = useState(false);
+  const [permissionRequested, setPermissionRequested] = useState(false);
+  const [deviceNotFound, setDeviceNotFound] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const [remoteAudioEnabled, setRemoteAudioEnabled] = useState(true);
   const [remoteVideoEnabled, setRemoteVideoEnabled] = useState(true);
   const [isConnected, setIsConnected] = useState(false);
@@ -21,7 +24,9 @@ const VideoCall = () => {
   const { myPeerId, anotherPeerId } = UseVideoCall();
 
   useEffect(() => {
-    if (!myPeerId || !anotherPeerId) return;
+    if (!myPeerId || !anotherPeerId) {
+      return;
+    }
 
     const initPeer = async () => {
       const peer = new Peer(myPeerId, {
@@ -34,12 +39,13 @@ const VideoCall = () => {
       });
       peerRef.current = peer;
 
-      peer.on("open", startCall);
+      peer.on("open", () => {
+        setPermissionRequested(true);
+        startCall();
+      });
       peer.on("call", handleIncomingCall);
       peer.on("error", handleError);
       peer.on("close", () => handleEndCall());
-
-      // Set a timeout to check if connection is established
     };
 
     initPeer();
@@ -53,8 +59,12 @@ const VideoCall = () => {
   }, [myPeerId, anotherPeerId]);
 
   const handleCleanup = () => {
-    if (connectionRef.current) connectionRef.current.close();
-    if (peerRef.current) peerRef.current.destroy();
+    if (connectionRef.current) {
+      connectionRef.current.close();
+    }
+    if (peerRef.current) {
+      peerRef.current.destroy();
+    }
     if (myVideoStream) {
       myVideoStream.getTracks().forEach((track) => track.stop());
     }
@@ -65,30 +75,196 @@ const VideoCall = () => {
     console.log("Peer error:", error);
   };
 
+  // Check if devices are available before requesting permissions
+  const checkDevicesAvailability = async () => {
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const hasVideoInput = devices.some(
+        (device) => device.kind === "videoinput",
+      );
+      const hasAudioInput = devices.some(
+        (device) => device.kind === "audioinput",
+      );
+
+      if (!hasVideoInput && !hasAudioInput) {
+        setDeviceNotFound(true);
+        setErrorMessage("No camera or microphone found on your device.");
+        return false;
+      } else if (!hasVideoInput) {
+        setDeviceNotFound(true);
+        setErrorMessage("No camera found on your device.");
+        return false;
+      } else if (!hasAudioInput) {
+        setDeviceNotFound(true);
+        setErrorMessage("No microphone found on your device.");
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error("Error checking devices:", error);
+      setDeviceNotFound(true);
+      setErrorMessage(
+        "Unable to check for available devices. Please ensure your browser has permission to access media devices.",
+      );
+      return false;
+    }
+  };
+
   const getMediaStream = async () => {
     try {
+      // First check if devices are available
+      const devicesAvailable = await checkDevicesAvailability();
+      if (!devicesAvailable) {
+        throw new Error("Required devices not available");
+      }
+
+      // Try to get both audio and video
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: true,
         video: true,
       });
+
       setMyVideoStream(stream);
-      if (myVideoRef.current) myVideoRef.current.srcObject = stream;
+      if (myVideoRef.current) {
+        myVideoRef.current.srcObject = stream;
+      }
       setPermissionDenied(false);
+      setDeviceNotFound(false);
+      setErrorMessage("");
+      setPermissionRequested(true);
       return stream;
     } catch (error) {
       console.error("Media stream error:", error);
-      setPermissionDenied(true);
+
+      // Handle specific errors
+      if (error.name === "NotFoundError") {
+        setDeviceNotFound(true);
+        setErrorMessage(
+          "Camera or microphone not found. Please check your device connections.",
+        );
+      } else if (error.name === "NotAllowedError") {
+        setPermissionDenied(true);
+        setDeviceNotFound(false);
+        setErrorMessage("Permission to use camera and microphone was denied.");
+      } else if (error.name === "AbortError") {
+        setErrorMessage(
+          "Hardware error occurred with your camera or microphone.",
+        );
+        setDeviceNotFound(true);
+      } else {
+        setPermissionDenied(true);
+        setErrorMessage("Error accessing media devices: " + error.message);
+      }
+
+      setPermissionRequested(true);
       throw error;
     }
   };
 
+  // Try with audio only if video+audio fails
+  const tryAudioOnlyStream = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+        video: false,
+      });
+
+      setMyVideoStream(stream);
+      if (myVideoRef.current) {
+        myVideoRef.current.srcObject = stream;
+      }
+      setPermissionDenied(false);
+      setDeviceNotFound(false);
+      setIsCameraOff(true); // Set camera off since we're audio only
+      setErrorMessage("Video unavailable. Proceeding with audio only.");
+      setPermissionRequested(true);
+      return stream;
+    } catch (error) {
+      console.error("Audio-only stream error:", error);
+      throw error;
+    }
+  };
+
+  const requestPermissions = async () => {
+    setPermissionRequested(true);
+    setErrorMessage("");
+
+    try {
+      // First try with both audio and video
+      await getMediaStream();
+
+      // If stream obtained successfully, proceed with call
+      if (peerRef.current && peerRef.current.id === myPeerId) {
+        startCall();
+      } else {
+        // Re-initialize peer connection
+        initPeer();
+      }
+    } catch (error) {
+      // If failed with both, try audio only
+      if (error.name === "NotFoundError") {
+        try {
+          await tryAudioOnlyStream();
+
+          // If audio-only stream successful, proceed with call
+          if (peerRef.current && peerRef.current.id === myPeerId) {
+            startCall();
+          } else {
+            // Re-initialize peer connection
+            initPeer();
+          }
+        } catch (audioError) {
+          console.error("Failed to get audio-only stream:", audioError);
+          // Both attempts failed, update UI accordingly
+        }
+      }
+    }
+  };
+
+  const initPeer = async () => {
+    const peer = new Peer(myPeerId, {
+      config: {
+        iceServers: [
+          { urls: "stun:stun.l.google.com:19302" },
+          { urls: "stun:stun1.l.google.com:19302" },
+        ],
+      },
+    });
+    peerRef.current = peer;
+
+    peer.on("open", startCall);
+    peer.on("call", handleIncomingCall);
+    peer.on("error", handleError);
+    peer.on("close", () => handleEndCall());
+  };
+
   const handleIncomingCall = async (call) => {
     try {
-      const stream = await getMediaStream();
+      let stream;
+      try {
+        stream = await getMediaStream();
+      } catch (error) {
+        if (error.name === "NotFoundError") {
+          // Try with audio only if video fails
+          stream = await tryAudioOnlyStream();
+        } else {
+          throw error;
+        }
+      }
 
       // Set initial track states before answering
-      stream.getAudioTracks()[0].enabled = !isMuted;
-      stream.getVideoTracks()[0].enabled = !isCameraOff;
+      const audioTracks = stream.getAudioTracks();
+      if (audioTracks.length > 0) {
+        audioTracks[0].enabled = !isMuted;
+      }
+
+      const videoTracks = stream.getVideoTracks();
+      if (videoTracks.length > 0) {
+        videoTracks[0].enabled = !isCameraOff;
+      } else {
+        setIsCameraOff(true);
+      }
 
       call.answer(stream);
 
@@ -97,6 +273,7 @@ const VideoCall = () => {
           remoteVideoRef.current.srcObject = remoteStream;
           setIsConnected(true);
           setPermissionDenied(false);
+          setDeviceNotFound(false);
 
           remoteStream.getAudioTracks().forEach((track) => {
             track.onmuted = () => setRemoteAudioEnabled(false);
@@ -126,11 +303,30 @@ const VideoCall = () => {
 
   const startCall = async () => {
     try {
-      const stream = await getMediaStream();
+      let stream;
+      try {
+        stream = await getMediaStream();
+      } catch (error) {
+        if (error.name === "NotFoundError") {
+          // Try with audio only if video fails
+          stream = await tryAudioOnlyStream();
+        } else {
+          throw error;
+        }
+      }
 
       // Set initial track states before calling
-      stream.getAudioTracks()[0].enabled = !isMuted;
-      stream.getVideoTracks()[0].enabled = !isCameraOff;
+      const audioTracks = stream.getAudioTracks();
+      if (audioTracks.length > 0) {
+        audioTracks[0].enabled = !isMuted;
+      }
+
+      const videoTracks = stream.getVideoTracks();
+      if (videoTracks.length > 0) {
+        videoTracks[0].enabled = !isCameraOff;
+      } else {
+        setIsCameraOff(true);
+      }
 
       const call = peerRef.current.call(anotherPeerId, stream);
 
@@ -139,6 +335,7 @@ const VideoCall = () => {
           remoteVideoRef.current.srcObject = remoteStream;
           setIsConnected(true);
           setPermissionDenied(false);
+          setDeviceNotFound(false);
 
           remoteStream.getAudioTracks().forEach((track) => {
             track.onmuted = () => setRemoteAudioEnabled(false);
@@ -189,16 +386,22 @@ const VideoCall = () => {
     navigate("/");
   };
 
-  const NoPermission = () => (
+  const AccessError = () => (
     <div className="fixed flex items-center justify-center h-screen w-screen z-50 backdrop-blur-lg">
       <div className="bg-gray-800 p-6 rounded-lg shadow-lg max-w-md mx-4 text-center">
         <h2 className="text-xl text-white font-semibold mb-4">
-          Camera and Microphone Access Required
+          {deviceNotFound ? "Device Not Found" : "Permission Required"}
         </h2>
         <p className="text-red-500 mb-6">
-          Please allow access to your camera and microphone in your browser
-          settings to use the video call feature.
+          {errorMessage ||
+            "Please allow access to your camera and microphone to use the video call feature."}
         </p>
+        <button
+          onClick={requestPermissions}
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors mb-4"
+        >
+          {deviceNotFound ? "Try Again" : "Request Access"}
+        </button>
         <button
           onClick={() => navigate("/")}
           className="w-full bg-gray-700 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors"
@@ -211,7 +414,7 @@ const VideoCall = () => {
 
   return (
     <div className="flex items-center justify-center min-h-screen w-full backdrop-blur-md">
-      {permissionDenied && !isConnected && <NoPermission />}
+      {(permissionDenied || deviceNotFound) && !isConnected && <AccessError />}
       <div className="relative w-full h-full md:h-auto md:aspect-video md:max-w-6xl md:mx-4 lg:mx-auto">
         <div className="relative w-full h-screen md:h-full bg-black md:rounded-lg overflow-hidden">
           {/* Main video (remote) */}
@@ -245,6 +448,12 @@ const VideoCall = () => {
               muted
               autoPlay
             />
+            {/* Show camera off indicator on PiP when camera is off */}
+            {isCameraOff && (
+              <div className="absolute inset-0 flex items-center justify-center bg-gray-900 bg-opacity-70">
+                <CameraOff className="w-8 h-8 text-white opacity-70" />
+              </div>
+            )}
           </div>
 
           {/* Control buttons */}
@@ -276,6 +485,23 @@ const VideoCall = () => {
               <PhoneOff className="w-6 h-6 text-white" />
             </button>
           </div>
+
+          {/* Connection status message */}
+          {permissionRequested &&
+            !isConnected &&
+            !permissionDenied &&
+            !deviceNotFound && (
+              <div className="absolute bottom-24 left-1/2 transform -translate-x-1/2 bg-gray-800 bg-opacity-70 px-4 py-2 rounded-full text-white text-sm">
+                Connecting...
+              </div>
+            )}
+
+          {/* Audio-only mode indicator */}
+          {myVideoStream && myVideoStream.getVideoTracks().length === 0 && (
+            <div className="absolute top-24 left-1/2 transform -translate-x-1/2 bg-blue-600 bg-opacity-80 px-4 py-2 rounded-full text-white text-sm">
+              Audio-only mode
+            </div>
+          )}
         </div>
       </div>
     </div>
