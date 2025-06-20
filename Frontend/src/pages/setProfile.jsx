@@ -3,6 +3,8 @@ import { IconCameraRotate, IconUpload } from "@tabler/icons-react";
 import { useNavigate } from "react-router-dom";
 import useAuthStore from "../stores/useUser.js";
 import FlashMessageContext from "../context/flashMessageContext.jsx";
+import axios from "axios";
+import { updateProfile, getCloudinarySignature } from "../api/user";
 
 const SetProfile = () => {
   const [displayName, setDisplayName] = useState("");
@@ -27,25 +29,24 @@ const SetProfile = () => {
     };
     reader.readAsDataURL(file);
 
-    // Upload to Cloudinary
+    // Upload to Cloudinary with signature
     try {
       setIsUploading(true);
+      const folder = 'user_uploads';
+      const { timestamp, signature, cloudName, apiKey } = await getCloudinarySignature(folder);
       const formData = new FormData();
       formData.append("file", file);
-      formData.append("upload_preset", import.meta.env.VITE_UPLOAD_PRESET);
+      formData.append("api_key", apiKey);
+      formData.append("timestamp", timestamp);
+      formData.append("signature", signature);
+      formData.append("folder", folder);
 
-      const response = await fetch(
-        // eslint-disable-next-line no-undef
-        `https://api.cloudinary.com/v1_1/${process.env.VITE_CLOUD_NAME}/image/upload`, // Replace with your Cloudinary cloud name
-        {
-          method: "POST",
-          body: formData,
-        },
+      const response = await axios.post(
+        `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+        formData
       );
-
-      const data = await response.json();
-      setPhotoPreview(data.secure_url);
-      setNewPhoto(data.secure_url);
+      setPhotoPreview(response.data.secure_url);
+      setNewPhoto(response.data.secure_url);
     } catch (error) {
       showErrorMessage(error.message || "Unknown error");
       console.log("Error uploading image:", error);
@@ -57,29 +58,11 @@ const SetProfile = () => {
   const handelSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/api/user/profile`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            // Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-          credentials: "include",
-          body: JSON.stringify({
-            profileUrl: newPhoto || photoPreview,
-            name: displayName,
-          }),
-        },
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to update profile");
-      }
-
-      const data = await response.json();
+      const data = await updateProfile({
+        profileUrl: newPhoto || photoPreview,
+        name: displayName,
+      });
       setLogInUser(data.user);
-
       navigate("/");
     } catch (error) {
       showErrorMessage(error.message || "Unknown error");

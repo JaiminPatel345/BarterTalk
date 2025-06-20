@@ -1,6 +1,7 @@
 import { useContext, useState } from "react";
 import UseConversation from "../stores/useConversation";
 import FlashMessageContext from "../context/flashMessageContext";
+import { sendMessage as sendMessageAPI } from "../api/message";
 
 const useSendMessage = () => {
   const [loading, setLoading] = useState(false);
@@ -10,24 +11,7 @@ const useSendMessage = () => {
   const sendMessage = async (message) => {
     try {
       setLoading(true);
-      const response = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/api/message/send/${selectedConversation._id}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ message }),
-          credentials: "include",
-        },
-      );
-      const data = await response.json();
-      if (!response.ok) {
-        throw {
-          message: data.message,
-        };
-      }
-
+      const data = await sendMessageAPI(selectedConversation._id, message);
       setMessages([...messages, data]);
     } catch (error) {
       showErrorMessage(error.message || "Unknown error");

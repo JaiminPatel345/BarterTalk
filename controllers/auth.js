@@ -2,15 +2,14 @@ import mongoose from "mongoose";
 import User from "../models/user.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import generateTokenAndSetCookies from "../utilities/token.js";
+import generateToken from "../utilities/token.js";
 import useGoogleLogin from "../utilities/useGoogleLogin.js";
 import useGoogleSignup from "../utilities/useGoogleSignup.js";
 
 const login = async (req, res) => {
   const isByGoogle = req.query.bygoogle;
   if (isByGoogle) {
-    await useGoogleLogin(req.body, res);
-    return;
+    return await useGoogleLogin(req.body, res);
   }
 
   const { username, password } = req.body;
@@ -37,14 +36,14 @@ const login = async (req, res) => {
           message: "Invalid credentials",
         };
       }
-      generateTokenAndSetCookies(user._id, res);
+      const token = generateToken(user._id);
       res.json({
         user,
+        token,
         message: "Login successfully",
       });
     })
     .catch((error) => {
-      res.clearCookie("token");
       return res.status(error.status || 500).json({
         message: error.message || "An error occurred during login",
       });
@@ -54,8 +53,7 @@ const login = async (req, res) => {
 const signup = async (req, res) => {
   const isByGoogle = req.query.bygoogle;
   if (isByGoogle) {
-    await useGoogleSignup(req.body, res);
-    return;
+    return await useGoogleSignup(req.body, res);
   }
   const { name, username, password, gender, email } = req.body;
   if (!name || !username || !password || !gender || !email) {
@@ -98,15 +96,15 @@ const signup = async (req, res) => {
       return user.save();
     })
     .then((data) => {
-      generateTokenAndSetCookies(data._id, res);
+      const token = generateToken(data._id);
       return res.json({
         message: "User save successfully",
         data,
+        token,
       });
     })
     .catch((error) => {
       console.log("Signup error", error);
-
       return res.status(error.status || 500).json({
         message: error.message || "An error occurred during signup",
       });
@@ -114,8 +112,7 @@ const signup = async (req, res) => {
 };
 
 const logout = (req, res) => {
-  res.clearCookie("token");
-  // req.session.destroy()
+  // No cookies to clear, just respond
   res.json({
     message: "logout successfully",
   });

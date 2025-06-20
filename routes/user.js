@@ -6,5 +6,6 @@ import { protectRoute } from "../utilities/middleware.js";
 
 router.get("/users", protectRoute, UserController.getUsers);
 router.post("/user/profile", protectRoute, UserController.UpdateProfile);
+router.get("/cloudinary/signature", protectRoute, UserController.getCloudinarySignature);
 
 export default router;

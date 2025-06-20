@@ -1,6 +1,7 @@
 import { useContext, useState } from "react"
 import UseConversation from "../stores/useConversation"
 import FlashMessageContext from "../context/flashMessageContext"
+import { getMessages as getMessagesAPI } from "../api/message"
 
 const useGetMessages = () => {
     const [loading, setLoading] = useState(false)
@@ -9,26 +10,8 @@ const useGetMessages = () => {
 
     const getMessage = async () => {
         try {
-            
             setLoading(true)
-            const response = await fetch(
-                // eslint-disable-next-line no-undef
-                `${process.env.VITE_API_BASE_URL}/api/message/${selectedConversation._id}`,
-                {
-                    method: "GET",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    credentials: "include",
-                }
-            )
-            const data = await response.json()
-            if (!response.ok) {
-                throw {
-                    message: data.message,
-                }
-            }
-            
+            const data = await getMessagesAPI(selectedConversation._id)
             setMessages(data.messages)
         } catch (error) {
             showErrorMessage(error.message || "Unknown error")

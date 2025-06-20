@@ -5,6 +5,7 @@ import FlashMessageContext from "../context/flashMessageContext";
 import { GoogleLogin } from "@react-oauth/google";
 import setProfileFromGoogleLogin from "../hooks/setProfileFromGoogleLogin.js";
 import useAuthStore from "../stores/useUser.js";
+import { login as loginAPI } from "../api/auth";
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -35,6 +36,7 @@ const Login = () => {
       if (data) {
         showSuccessMessage(`Welcome ${data.user.name}!`);
         setLogInUser(data.user);
+        if (data.token) localStorage.setItem("token", data.token);
       }
     } catch (error) {
       showErrorMessage(error.message || "Unknown error");
@@ -52,23 +54,10 @@ const Login = () => {
         throw new Error("Fill all given fields");
       }
 
-      const response = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/api/login`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
-          credentials: "include",
-        },
-      );
-
-      const data = await response.json();
-      if (response.ok) {
-        showSuccessMessage(`Welcome ${formData.username}!`);
-        setLogInUser(data.user);
-      } else {
-        throw new Error(data.message);
-      }
+      const data = await loginAPI(formData);
+      showSuccessMessage(`Welcome ${formData.username}!`);
+      setLogInUser(data.user);
+      if (data.token) localStorage.setItem("token", data.token);
     } catch (error) {
       showErrorMessage(error.message || "Unknown error");
       console.error(error);
@@ -148,11 +137,11 @@ const Login = () => {
           </button>
         </form>
         <div className={`text-md mt-10 text-center`}>
-          <Link
-            to="/signup"
-            className=" text-blue-600 hover:text-blue-800 hover:underline  "
-          >
-            {`Don't have an account? SIGNUP`}
+          <Link to="/signup" className={"flex gap-3"}>
+            <p className={"text-black"}>{`Don't have an account?`}</p>
+            <p className=" text-blue-600 hover:text-blue-800 hover:underline  ">
+              SIGNUP
+            </p>
           </Link>
         </div>
       </div>

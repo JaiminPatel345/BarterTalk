@@ -1,5 +1,5 @@
 import User from "../models/user.js";
-import generateTokenAndSetCookies from "./token.js";
+import generateToken from "./token.js";
 
 const useGoogleLogin = async (googleUser, res) => {
   //find user in db
@@ -7,10 +7,10 @@ const useGoogleLogin = async (googleUser, res) => {
     email: googleUser.email,
   });
   if (dbUser) {
-    //generate token and set cookies
-    generateTokenAndSetCookies(dbUser._id, res);
+    const token = generateToken(dbUser._id);
     return res.json({
       user: dbUser,
+      token,
       message: "Login successfully",
     });
   }

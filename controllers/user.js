@@ -1,5 +1,6 @@
 import User from "../models/user.js";
 import { io } from "../socket/socket.js";
+import { generateUploadSignature } from "../utilities/cloudinary.js";
 
 const getUsers = (req, res) => {
   const loggedInUserId = req.user._id;
@@ -74,7 +75,14 @@ const UpdateProfile = (req, res) => {
     });
 };
 
+const getCloudinarySignature = (req, res) => {
+  const folder = req.query.folder || 'user_uploads';
+  const { timestamp, signature } = generateUploadSignature({ folder });
+  res.json({ timestamp, signature, folder, cloudName: process.env.CLOUDINARY_CLOUD_NAME, apiKey: process.env.CLOUDINARY_API_KEY });
+};
+
 export default {
   getUsers,
   UpdateProfile,
+  getCloudinarySignature,
 };

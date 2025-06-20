@@ -5,6 +5,7 @@ import { PuffLoader } from "react-spinners";
 import { useNavigate } from "react-router-dom";
 import UseConversation from "../../stores/useConversation";
 import useAuthStore from "../../stores/useUser.js";
+import { logout as logoutAPI } from "../../api/auth";
 
 const Logout = () => {
   const { showSuccessMessage, showErrorMessage, clearFlashMessage } =
@@ -20,27 +21,11 @@ const Logout = () => {
       LogoutUser();
       setUser(null);
       setSelectedConversation(null);
-      const response = await fetch(
-        // eslint-disable-next-line no-undef
-        `${process.env.VITE_API_BASE_URL}/api/logout`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-        },
-      );
-      const data = await response.json();
-      if (response.ok) {
-        clearFlashMessage();
-        showSuccessMessage(`Logout Successfully `);
-        navigate("/login");
-      } else {
-        throw {
-          message: data.message,
-        };
-      }
+      await logoutAPI();
+      localStorage.removeItem("token");
+      clearFlashMessage();
+      showSuccessMessage(`Logout Successfully `);
+      navigate("/login");
     } catch (error) {
       showErrorMessage(error.message || "Unknown error");
       console.log(error);

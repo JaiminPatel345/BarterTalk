@@ -1,21 +1,17 @@
 import { jwtDecode } from "jwt-decode";
+import axiosInstance from "../api/axiosInstance";
 
 const setProfileFromGoogleSignup = async (profile) => {
   const googleUser = jwtDecode(profile.credential);
-  const response = await fetch(
-    `${import.meta.env.VITE_API_BASE_URL}/api/signup?bygoogle=1`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(googleUser),
-      credentials: "include",
-    },
+  const response = await axiosInstance.post(
+    "/signup?bygoogle=1",
+    googleUser
   );
-  const responseData = await response.json();
-  if (response.ok) {
-    return responseData;
+  if ((response.status === 201 || response.status === 222) && response.data) {
+    if (response.data.token) localStorage.setItem("token", response.data.token);
+    return response.data;
   } else {
-    throw responseData;
+    throw response.data;
   }
 };
 

@@ -1,5 +1,5 @@
 import User from "../models/user.js";
-import generateTokenAndSetCookies from "./token.js";
+import generateToken from "./token.js";
 
 const useGoogleSignup = async (googleUser, res) => {
   //find user in db
@@ -7,10 +7,10 @@ const useGoogleSignup = async (googleUser, res) => {
     email: googleUser.email,
   });
   if (dbUser) {
-    //generate token and set cookies
-    generateTokenAndSetCookies(dbUser._id, res);
+    const token = generateToken(dbUser._id);
     return res.status(222).json({
       user: dbUser,
+      token,
       message: "Already registered , no need to signup",
     });
   }
@@ -22,11 +22,12 @@ const useGoogleSignup = async (googleUser, res) => {
   });
 
   const user = await newUser.save();
-  generateTokenAndSetCookies(user._id, res);
+  const token = generateToken(user._id);
 
   return res.status(201).json({
     message: "User created successfully",
     user,
+    token,
   });
 };
 

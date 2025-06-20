@@ -6,6 +6,7 @@ import FlashMessageContext from "../context/flashMessageContext";
 import { GoogleLogin } from "@react-oauth/google";
 import setProfileFromGoogleSignup from "../hooks/setProfileFromGoogleSignup.js";
 import useAuthStore from "../stores/useUser.js";
+import { signup as signupAPI } from "../api/auth";
 
 const SignUp = () => {
   const [formData, setFormData] = useState({
@@ -62,30 +63,17 @@ const SignUp = () => {
         throw new Error("Passwords do not match");
       }
 
-      const response = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/api/signup`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name: formData.name,
-            username: formData.username,
-            password: formData.password,
-            email: formData.email,
-            gender,
-          }),
-          credentials: "include",
-        },
-      );
-
-      const data = await response.json();
-      if (response.ok) {
-        showSuccessMessage(`Welcome ${formData.name}!`);
-        setLogInUser(data.data);
-        navigate("/profile");
-      } else {
-        throw new Error(data.message);
-      }
+      const data = await signupAPI({
+        name: formData.name,
+        username: formData.username,
+        password: formData.password,
+        email: formData.email,
+        gender,
+      });
+      showSuccessMessage(`Welcome ${formData.name}!`);
+      setLogInUser(data.data);
+      if (data.token) localStorage.setItem("token", data.token);
+      navigate("/profile");
     } catch (error) {
       showErrorMessage(error.message || "Unknown error");
       console.error(error);
@@ -151,7 +139,7 @@ const SignUp = () => {
               type="text"
               value={formData.username}
               name="username"
-              placeholder="jaimin123"
+              placeholder="Enter unique Username"
               className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
               onChange={handleChange}
             />
@@ -165,7 +153,7 @@ const SignUp = () => {
               type="text"
               value={formData.email}
               name="email"
-              placeholder="jaimin@gmail.com"
+              placeholder="Enter correct email"
               className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
               onChange={handleChange}
             />
@@ -179,7 +167,7 @@ const SignUp = () => {
               type="password"
               value={formData.password}
               name="password"
-              placeholder="Enter Password"
+              placeholder="Enter strong Password"
               className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
               onChange={handleChange}
             />

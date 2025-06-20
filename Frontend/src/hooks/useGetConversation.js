@@ -3,6 +3,7 @@ import FlashMessageContext from "../context/flashMessageContext";
 import UseConversation from "../stores/useConversation";
 import useAuthStore from "../stores/useUser.js";
 import useConversation from "../stores/useConversation";
+import { getUsers } from "../api/user";
 
 const useGetConversations = () => {
   const { setConversations } = useConversation();
@@ -14,25 +15,8 @@ const useGetConversations = () => {
   useEffect(() => {
     const getConversations = async () => {
       try {
-        const response = await fetch(
-          // eslint-disable-next-line no-undef
-          `${process.env.VITE_API_BASE_URL}/api/users`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            credentials: "include",
-          },
-        );
-        const data = await response.json();
-        if (!response.ok) {
-          throw {
-            message: data.message,
-          };
-        }
+        const data = await getUsers();
         setConversations(data);
-        // console.log(data);
         setFilteredConversations(data);
       } catch (error) {
         showErrorMessage(error.message || "Unknown error");
