@@ -31,8 +31,18 @@ const SocketInitializer = () => {
 };
 
 const Layout = () => {
+  // Debug: Log Google Client ID to verify env variable is loaded
+  const googleClientId = import.meta.env.VITE_APP_GOOGLE_CLIENT_ID;
+
+  console.log('🔑 Google OAuth Client ID:', googleClientId);
+  console.log('🌍 All Vite env vars:', import.meta.env);
+
+  if (!googleClientId) {
+    console.error('❌ VITE_APP_GOOGLE_CLIENT_ID is not set! Check your .env file');
+  }
+
   return (
-    <GoogleOAuthProvider clientId={import.meta.env.VITE_APP_GOOGLE_CLIENT_ID}>
+    <GoogleOAuthProvider clientId={googleClientId}>
       <FlashMessageProvider>
         <div className="min-h-screen relative">
           <FlashMessageDisplay />
